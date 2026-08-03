@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>남자 패션 트렌드 통합 플랫폼 — 랭킹 · 가격비교</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --card: #191c22;
+    --card-hover: #20242c;
+    --border: #2a2e37;
+    --text: #eaecef;
+    --text-dim: #9aa0ac;
+    --accent: #ff5757;
+    --accent2: #4d9fff;
+  }
+  * { box-sizing: border-box; margin:0; padding:0; }
+  body {
+    font-family: -apple-system, "Pretendard", "Noto Sans KR", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+  }
+  header {
+    position: sticky; top:0; z-index: 100;
+    background: rgba(15,17,21,0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    padding: 18px 24px;
+  }
+  .header-inner {
+    max-width: 1400px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+  }
+  h1 { font-size: 20px; font-weight: 800; }
+  h1 span { color: var(--accent); }
+  .subtitle { font-size: 12.5px; color: var(--text-dim); margin-top: 2px; }
+  .search-box { flex: 1; max-width: 360px; min-width: 200px; }
+  .search-box input {
+    width: 100%; padding: 10px 14px; border-radius: 10px;
+    border: 1px solid var(--border); background: var(--card); color: var(--text);
+    font-size: 14px;
+  }
+  .search-box input:focus { outline: none; border-color: var(--accent2); }
+
+  .main-tabs {
+    max-width: 1400px; margin: 20px auto 0; padding: 0 24px;
+    display: flex; gap: 10px;
+  }
+  .main-tab {
+    padding: 11px 22px; border-radius: 10px 10px 0 0; border: 1px solid var(--border); border-bottom: none;
+    background: var(--card); color: var(--text-dim); cursor: pointer; font-size: 14px; font-weight: 700;
+  }
+  .main-tab.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+  .controls {
+    max-width: 1400px; margin: 0 auto; padding: 16px 24px 0;
+    border-top: 1px solid var(--border);
+  }
+  .cat-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 0 14px; }
+  .cat-tab {
+    padding: 9px 18px; border-radius: 999px; border: 1px solid var(--border);
+    background: var(--card); color: var(--text-dim); cursor: pointer;
+    font-size: 13.5px; font-weight: 600; transition: all .15s;
+  }
+  .cat-tab:hover { border-color: var(--accent2); color: var(--text); }
+  .cat-tab.active { background: var(--accent); border-color: var(--accent); color: white; }
+
+  .source-tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom: 16px; }
+  .source-tab {
+    padding: 6px 14px; border-radius: 8px; border: 1px solid var(--border);
+    background: transparent; color: var(--text-dim); cursor: pointer; font-size: 12.5px; font-weight: 600;
+  }
+  .source-tab.active { background: var(--card); color: var(--text); border-color: var(--accent2); }
+
+  .sort-row { display:flex; align-items:center; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+  .sort-row label { font-size: 12.5px; color: var(--text-dim); }
+  .sort-row select {
+    background: var(--card); color: var(--text); border: 1px solid var(--border);
+    border-radius: 8px; padding: 7px 10px; font-size: 13px;
+  }
+  .result-count { margin-left: auto; font-size: 12.5px; color: var(--text-dim); }
+
+  .grid {
+    max-width: 1400px; margin: 0 auto; padding: 0 24px 60px;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 18px;
+  }
+  .card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+    overflow: hidden; transition: all .2s; cursor: pointer;
+    text-decoration: none; color: inherit; display: block; position: relative;
+  }
+  .card:hover { background: var(--card-hover); transform: translateY(-3px); border-color: #3a3f4a; }
+  .card-img {
+    width: 100%; aspect-ratio: 3/4; background: #14161b;
+    display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative;
+  }
+  .card-img img { width: 100%; height: 100%; object-fit: cover; display:block; }
+  .no-img {
+    color: #4a4f5a; font-size: 13px; text-align:center; padding: 10px;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+  }
+  .no-img .icon { font-size: 28px; opacity: 0.4; }
+  .rank-badge {
+    position: absolute; top: 8px; left: 8px;
+    width: 26px; height: 26px; border-radius: 8px;
+    background: rgba(0,0,0,0.75); color: #ffce54; font-weight: 800; font-size: 13px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .badge-source {
+    position: absolute; top: 8px; left: 8px;
+    font-size: 10.5px; font-weight: 700; padding: 4px 9px; border-radius: 999px;
+    color: white; letter-spacing: 0.2px;
+  }
+  .src-무신사 { background: #ff5757; }
+  .src-W컨셉 { background: #7b5eff; }
+  .src-하이버 { background: #ff6b35; }
+  .src-댄블 { background: #2a63ff; }
+  .multi-badge {
+    position: absolute; top: 8px; left: 8px;
+    font-size: 10.5px; font-weight: 700; padding: 4px 9px; border-radius: 999px;
+    color: #0f1115; background: #ffce54;
+  }
+
+  .badge-discount {
+    position: absolute; top: 8px; right: 8px;
+    background: rgba(0,0,0,0.75); color: #ffce54; font-weight: 800; font-size: 12px;
+    padding: 4px 8px; border-radius: 6px;
+  }
+  .card-body { padding: 13px 14px 15px; }
+  .brand { font-size: 12.5px; color: var(--text-dim); font-weight: 700; margin-bottom: 3px; }
+  .name {
+    font-size: 13.5px; font-weight: 600; margin-bottom: 10px; min-height: 38px;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .price-row { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+  .original-price { font-size: 12px; color: #5a5f6a; text-decoration: line-through; }
+  .sale-price { font-size: 17px; font-weight: 800; color: var(--text); }
+  .discount-pct { font-size: 13px; font-weight: 800; color: var(--accent); }
+
+  .compare-box {
+    margin-top: 10px; padding: 8px 10px; background: rgba(77,159,255,0.08);
+    border: 1px solid rgba(77,159,255,0.25); border-radius: 8px;
+  }
+  .compare-title { font-size: 10.5px; color: var(--accent2); font-weight: 700; margin-bottom: 6px; }
+  .compare-row {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 12px; padding: 3px 0;
+  }
+  .compare-row .src-name { font-weight: 700; }
+  .compare-row.best { color: #7ee787; }
+  .compare-row .price-val { font-weight: 700; }
+
+  .category-tag {
+    margin-top: 8px; font-size: 11px; color: var(--text-dim);
+    border-top: 1px dashed var(--border); padding-top: 8px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .view-link { color: var(--accent2); font-weight: 600; }
+
+  .empty-state { text-align: center; padding: 80px 20px; color: var(--text-dim); grid-column: 1 / -1; }
+
+  footer {
+    text-align: center; padding: 30px; color: var(--text-dim); font-size: 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  @media (max-width: 640px) {
+    .grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+    h1 { font-size: 17px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div>
+      <h1>남자 패션 <span>트렌드 통합</span> 플랫폼</h1>
+      <div class="subtitle">무신사 · W컨셉 · 하이버 · 댄블 실시간 랭킹 한눈에 비교</div>
+    </div>
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="브랜드 또는 상품명 검색...">
+    </div>
+  </div>
+</header>
+
+<div class="main-tabs" id="mainTabs"></div>
+
+<div class="controls">
+  <div class="cat-tabs" id="catTabs"></div>
+  <div class="source-tabs" id="sourceTabs"></div>
+  <div class="sort-row">
+    <label for="sortSelect">정렬</label>
+    <select id="sortSelect">
+      <option value="discount_desc">할인율 높은순</option>
+      <option value="price_asc">가격 낮은순</option>
+      <option value="price_desc">가격 높은순</option>
+    </select>
+    <div class="result-count" id="resultCount"></div>
+  </div>
+</div>
+
+<div class="grid" id="productGrid"></div>
+
+<footer>
+  데이터 출처: 무신사(musinsa.com) · W컨셉(wconcept.co.kr) · 하이버(hiver.co.kr) · 댄블(danble.co.kr) 실시간 랭킹 기준 (2026년 8월 조사)<br>
+  가격/할인율은 조사 시점 기준이며 실시간으로 변동될 수 있습니다. 원가는 판매가와 할인율로 역산한 추정치입니다. 카드를 클릭하면 최저가 판매처의 실제 상품 페이지로 이동합니다.<br>
+  "동일 상품 판매처 비교"는 자동 텍스트 매칭으로 확인된 것만 표시하며, 매칭되지 않은 동일 상품이 더 있을 수 있습니다.
+</footer>
+
+<script>
+const PRODUCTS = [{"category": "상의", "brand": "언더오프", "name": "롤업 슬리브 크롭 반팔 티셔츠 블랙", "price": 22320, "discount": 41, "source": "무신사", "image": "https://image.msscdn.net/thumbnails/images/goods_img/20260602/6593921/6593921_17803822944311_500.jpg?w=780", "sale_price": 22320, "link": "https://www.musinsa.com/products/6593921", "offers": [{"source": "무신사", "sale_price": 22320, "discount": 41, "link": "https://www.musinsa.com/products/6593921"}], "best_price": 22320, "max_discount": 41, "num_sources": 1, "original_price": 37831, "overall_rank": 22}, {"category": "상의", "brand": "언더오프", "name": "롤업 슬리브 크롭 반팔 티셔츠 버건디", "price": 22320, "discount": 41, "source": "무신사", "image": "https://image.msscdn.net/thumbnails/images/goods_img/20260602/6593924/6593924_17803822672936_500.jpg?w=780", "sale_price": 22320, "link": "https://www.musinsa.com/products/6593924", "offers": [{"source": "무신사", "sale_price": 22320, "discount": 41, "link": "https://www.musinsa.com/products/6593924"}], "best_price": 22320, "max_discount": 41, "num_sources": 1, "original_price": 37831, "overall_rank": 23}, {"category": "상의", "brand": "트릴리온", "name": "내츄럴 리조트 롤업 하프 셔츠 3color", "price": 29900, "discount": 38, "source": "무신사", "image": "https://image.msscdn.net/thumbnails/images/goods_img/20260414/6307599/6307599_17767587812286_500.jpg?w=780", "sale_price": 29900, "link": "https://www.musinsa.com/products/6307599", "offers": [{"source": "무신사", "sale_price": 29900, "discount": 38, "link": "https://www.musinsa.com/products/6307599"}], "best_price": 29900, "max_discount": 38, "num_sources": 1, "original_price": 48226, "overall_rank": 26}, {"category": "상의", "brand": "플루크(FLUKE)", "name": "어드벤쳐 트럭커 포켓 반팔티셔츠 4color", "price": 15308, "discount": 53, "source": "W컨셉", "image": "https://product-image.wconcept.co.kr/productimg/image/img9/36/300968436_QJ70721.jpg?RS=374", "sale_price": 15308, "link": "https://www.wconcept.co.kr/Product/300968436", "offers": [{"source": "W컨셉", "sale_price": 15308, "discount": 53, "link": "https://www.wconcept.co.kr/Product/300968436"}], "best_price": 15308, "max_discount": 53, "num_sources": 1, "original_price": 32570, "overall_rank": 16}, {"category": "상의", "brand": "플루크(FLUKE)", "name": "내셔널 마운틴 피그먼트 반팔티 4color", "price": 22360, "discount": 47, "source": "W컨셉", "image": "https://product-image.wconcept.co.kr/productimg/image/img9/67/302669567_IL55893.jpg?RS=374", "sale_price": 22360, "link": "https://www.wconcept.co.kr/Product/302669567", "offers": [{"source": "W컨셉", "sale_price": 22360, "discount": 47, "link": "https://www.wconcept.co.kr/Product/302669567"}], "best_price": 22360, "max_discount": 47, "num_sources": 1, "original_price": 42189, "overall_rank": 20}, {"category": "상의", "brand": "MINIMAL PROJECT", "name": "로버스트 헤비 오버핏 반팔티셔츠 8color (2PACK)", "price": 32198, "discount": 55, "source": "W컨셉", "image": "https://product-image.wconcept.co.kr/productimg/image/img9/47/307346447_JH14008.jpg?RS=374", "sale_price": 32198, "link": "https://www.wconcept.co.kr/Product/307346447", "offers": [{"source": "W컨셉", "sale_price": 32198, "discount": 55, "link": "https://www.wconcept.co.kr/Product/307346447"}], "best_price": 32198, "max_discount": 55, "num_sources": 1, "original_price": 71551, "overall_rank": 14}, {"category": "상의", "brand": "스투시", "name": "베이직 반팔티 2종 택1", "price": 29000, "discount": 76, "source": "하이버", "image": "https://image.brandi.co.kr/cproduct/2026/04/23/SB000000000178229551_1776940434666_image1_S.jpg", "sale_price": 29000, "link": "https://www.hiver.co.kr/products/182818198", "offers": [{"source": "하이버", "sale_price": 29000, "discount": 76, "link": "https://www.hiver.co.kr/products/182818198"}], "best_price": 29000, "max_discount": 76, "num_sources": 1, "original_price": 120833, "overall_rank": 2}, {"category": "상의", "brand": "폴로 랄프 로렌", "name": "PK반팔 카라티셔츠 (6컬러)", "price": 42300, "discount": 71, "source": "하이버", "image": "https://image.brandi.co.kr/cproduct/2026/06/05/SB000000000178390647_1780680764109_image1_S.jpg", "sale_price": 42300, "link": "https://www.hiver.co.kr/products/182966479", "offers": [{"source": "하이버", "sale_price": 42300, "discount": 71, "link": "https://www.hiver.co.kr/products/182966479"}], "best_price": 42300, "max_discount": 71, "num_sources": 1, "original_price": 145862, "overall_rank": 5}, {"category": "상의", "brand": "메종키츠네", "name": "그레이폭스 남녀 반팔 티셔츠", "price": 38900, "discount": 35, "source": "하이버", "image": "https://image.brandi.co.kr/cproduct/2026/04/28/SB000000000178279127_1777400593417_image1_S.jpg", "sale_price": 38900, "link": "https://www.hiver.co.kr/products/182855705", "offers": [{"source": "하이버", "sale_price": 38900, "discount": 35, "link": "https://www.hiver.co.kr/products/182855705"}], "best_price": 38900, "max_discount": 35, "num_sources": 1, "original_price": 59846, "overall_rank": 29}, {"category": "상의", "brand": "나이키", "name": "드라이핏 레젼드 반팔티 DX0989", "price": 18900, "discount": 72, "source": "댄블", "image": "https://image.brandi.co.kr/cproduct/2025/03/18/SB000000000170670780_1742316830827_image1_S.jpg", "sale_price": 17900, "link": "https://www.hiver.co.kr/products/175466788", "offers": [{"source": "댄블", "sale_price": 18900, "discount": 71, "link": "https://danble.co.kr/product/68940"}, {"source": "하이버", "sale_price": 17900, "discount": 72, "link": "https://www.hiver.co.kr/products/175466788"}], "best_price": 17900, "max_discount": 72, "num_sources": 2, "original_price": 63929, "overall_rank": 3}, {"category": "상의", "brand": "BIRBANTE", "name": "썸머 워셔블 스트라이프 카라 니트", "price": 39900, "discount": 41, "source": "댄블", "image": "https://ds1l559sry31l.cloudfront.net/media/clothes/12575c2a-7b21-4cda-a828-fb7bc5166b79.jpg?w=600&f=webp&q=85", "sale_price": 39900, "link": "https://danble.co.kr/product/48124", "offers": [{"source": "댄블", "sale_price": 39900, "discount": 41, "link": "https://danble.co.kr/product/48124"}], "best_price": 39900, "max_discount": 41, "num_sources": 1, "original_price": 67627, "overall_rank": 24}, {"category": "상의", "brand": "DOCENT", "name": "오픈카라 에어코튼 반팔니트 라이트그레이", "price": 39900, "discount": 50, "source": "댄블", "image": "https://ds1l559sry31l.cloudfront.net/media/clothes/fc82f6b7-cc8a-4c29-a16e-58ec4bf1c8d8.png?w=600&f=webp&q=85", "sale_price": 39900, "link": "https://danble.co.kr/product/214165", "offers": [{"source": "댄블", "sale_price": 39900, "discount": 50, "link": "https://danble.co.kr/product/214165"}], "best_price": 39900, "max_discount": 50, "num_sources": 1, "original_price": 79800, "overall_rank": 18}, {"category": "상의", "brand": "POLO RALPH LAUREN", "name": "포니 로고 반팔 티셔츠 블랙", "price": 28900, "discount": 58, "source": "댄블", "image": "https://ds1l559sry31l.cloudfront.net/media/clothes/fbb4ef5f-6635-4bac-bb9b-9a296f224685.jpg?w=800&f=webp&q=100", "sale_price": 28900, "link": "https://danble.co.kr/product/69120", "offers": [{"source": "댄블", "sale_price": 28900, "discount": 58, "link": "https://danble.co.kr/product/69120"}], "best_price": 28900, "max_discount": 58, "num_sources": 1, "original_price": 68810, "overall_rank": 12}, {"category": "아우터", "brand": "스파오", "name": "3-LAYER 테크니컬 윈드브레이커", "price": 64730, "discount": 28, "source": "무신사", "image": "https://image.msscdn.net/thumbnails/images/goods_img/20260720/6876831/6876831_17853924810722_500.png?w=780", "sale_price": 64730, "link": "https://www.musinsa.com/products/6876831", "offers": [{"source": "무신사", "sale_price": 64730, "discount": 28, "link": "https://www.musinsa.com/products/6876831"}], "best_price": 64730, "max_discount": 28, "num_sources": 1, "original_price": 89903, "overall_rank": 34}, {"category": "아우터", "brand": "블랙야크", "name": "클라이밍 스톤마스터 라이트 다운자켓#3 (5color)", "price": 239000, "discount": 20, "source": "무신사", "image": "https://image.msscdn.net/thumbnails/images/goods_img/20260723/6908583/6908583_17853877119438_500.jpg?w=780", "sale_price": 239000, "link": "https://www.musinsa.com/products/6908583", "offers": [{"source": "무신사", "sale_price": 239000, "discount": 20, "link": "https://www.musinsa.com/products/6908583"}], "best_price": 239000, "max_discount": 20, "num_sources": 1, "original_price": 298750, "overall_rank": 38}, {"category": "아우터", "brand": "아디다스", "name": "와플 클래식 트랙탑 블랙", "price": 108990, "discount": 16, "source": "무신사", "image": "https://image.msscdn.net/thumbnails/images/goods_img/20260127/5943429/5943429_17745057177730_500.jpg?w=780", "sale_price": 108990, "link": "https://www.musinsa.com/products/5943429", "offers": [{"source": "무신사", "sale_price": 108990, "discount": 16, "link": "https://www.musinsa.com/products/5943429"}], "best_price": 108990, "max_discount": 16, "num_sources": 1, "original_price": 129750, "overall_rank": 39}, {"category": "아우터", "brand": "꼼데가르송", "name": "[SS26] 레드 와펜 바람막이 캐주얼 자켓", "price": 186928, "discount": 24, "source": "W컨셉", "image": "https://product-image.wconcept.co.kr/productimg/image/img9/63/308711563_NO21409.jpg?RS=374", "sale_price": 186928, "link": "https://www.wconcept.co.kr/Product/308711563", "offers": [{"source": "W컨셉", "sale_price": 186928, "discount": 24, "link": "https://www.wconcept.co.kr/Product/308711563"}], "best_price": 186928, "max_discount": 24, "num_sources": 1, "original_price": 245958, "overall_rank": 36}, {"category": "아우터", "brand": "VALOREN", "name": "Green Shadow Line Jacket", "price": 1020000, "discount": 2, "source": "W컨셉", "image": "https://product-image.wconcept.co.kr/productimg/image/img9/36/305929736_LN80318.jpg?RS=374", "sale_price": 1020000, "link": "https://www.wconcept.co.kr/Product/305929736", "offers": [{"source": "W컨셉", "sale_price": 1020000, "discount": 2, "link": "https://www.wconcept.co.kr/Product/305929736"}], "best_price": 1020000, "max_discount": 2, "num_sources": 1, "original_price": 1040816, "overall_rank": 43}, {"category": "아우터", "brand": "꼼데가르송", "name": "레드와펜 가디건 블랙", "price": 92000, "discount": 80, "source": "하이버", "image": "https://image.brandi.co.kr/cproduct/2026/04/22/SB000000000178222333_1776867335287_image1_S.jpg", "sale_price": 92000, "link": "https://www.hiver.co.kr/products/182813990", "offers": [{"source": "하이버", "sale_price": 92000, "discount": 80, "link": "https://www.hiver.co.kr/products/182813990"}], "best_price": 92000, "max_discount": 80, "num_sources": 1, "original_price": 460000, "overall_rank": 1}, {"category": "아우터", "brand": "MAISON KITSUNE", "name": "그레이 폭스 헤드 남성 가디건 (블랙)", "price": 169000, "discount": 63, "source": "댄블", "image": "https://ds1l559sry31l.cloudfront.net/media/clothes/b239d99f-32df-4d82-909a-28630608919e.jpg?w=800&f=webp&q=100", "sale_price": 169000, "link": "https://danble.co.kr/product/111417", "offers": [{"source": "댄블", "sale_price": 169000, "discount": 63, "link": "https://danble.co.kr/product/111417"}], "best_price": 169000, "max_discount": 63, "num_sources": 1, "original_price": 456757, "overall_rank": 10}, {"category": "아우터", "brand": "STCO", "name": "DYED WASHING 어반 자켓 카키 (오버핏)", "price": 69000, "discount": 47, "source": "댄블", "image": "https://ds1l559sry31l.cloudfront.net/media/clothes/8eeff5fe-9494-4b84-8095-a287be31cc67.jpg?w=800&f=webp&q=100", "sale_price": 69000, "link": "https://danble.co.kr/product/39788", "offers": [{"source": "댄블", "sale_price": 69000, "discount": 47, "link": "https://danble.co.kr/product/39788"}], "best_price": 69000, "max_discount": 47, "num_sources": 1, "original_price": 130189, "overall_rank": 21}, {"category": "아우터", "brand": "ZIOZIA", "name": "미라쿨 반팔 카라 가디건", "price": 37000, "discount": 71, "source": "댄블", "image": "https://ds1l559sry31l.cloudfront.net/media/clothes/ece5a966-06dd-4325-81cf-eab47a3c04d0.jpg?w=800&f=webp&q=100", "sale_price": 37000, "link": "https://danble.co.kr/product/221909", "offers": [{"source": "댄블", "sale_price": 37000, "discount": 71, "link": "https://danble.co.kr/product/221909"}], "best_price": 37000, "max_discount": 71, "num_sources": 1, "original_price": 127586, "overall_rank": 6}, {"category": "하의", "brand": "모즈모즈", "name": "컴포트 썸머 와이드 팬츠 블랙", "price": 19200, "discount": 40, "source": "무신사", "image": "https://image.msscdn.net/thumbnails/images/goods_img/20260318/6152463/6152463_17822622701511_500.jpg?w=780", "sale_price": 19200, "link": "https://www.musinsa.com/products/6152463", "offers": [{"source": "무신사", "sale_price": 19200, "discount": 40, "link": "https://www.musinsa.com/products/6152463"}], "best_price": 19200, "max_discount": 40, "num_sources": 1, "original_price": 32000, "overall_rank": 25}, {"category": "하의", "brand": "디미트리블랙", "name": "COOLMAX 원턱 스웻 하프 팬츠 3color", "price": 19900, "discount": 52, "source": "무신사", "image": "https://image.msscdn.net/thumbnails/images/goods_img/20260408/6278961/6278961_17788291612493_500.png?w=780", "sale_price": 19900, "link": "https://www.musinsa.com/products/6278961", "offers": [{"source": "무신사", "sale_price": 19900, "discount": 52, "link": "https://www.musinsa.com/products/6278961"}], "best_price": 19900, "max_discount": 52, "num_sources": 1, "original_price": 41458, "overall_rank": 17}, {"category": "하의", "brand": "무신사 스탠다드", "name": "커브드 데님 팬츠 (8colors)", "price": 44890, "discount": 10, "source": "무신사", "image": "https://image.msscdn.net/thumbnails/images/goods_img/20260304/6078643/6078643_17836638554659_500.jpg?w=780", "sale_price": 44890, "link": "https://www.musinsa.com/products/6078643", "offers": [{"source": "무신사", "sale_price": 44890, "discount": 10, "link": "https://www.musinsa.com/products/6078643"}], "best_price": 44890, "max_discount": 10, "num_sources": 1, "original_price": 49878, "overall_rank": 42}, {"category": "하의", "brand": "리베아르", "name": "초경량 타슬란 우븐 쇼츠 배기스 반바지", "price": 38800, "discount": 36, "source": "W컨셉", "image": "https://product-image.wconcept.co.kr/productimg/image/img9/96/307149296_CK52598.jpg?RS=374", "sale_price": 38800, "link": "https://www.wconcept.co.kr/Product/307149296", "offers": [{"source": "W컨셉", "sale_price": 38800, "discount": 36, "link": "https://www.wconcept.co.kr/Product/307149296"}], "best_price": 38800, "max_discount": 36, "num_sources": 1, "original_price": 60625, "overall_rank": 27}, {"category": "하의", "brand": "이즈(ease)", "name": "LINEN BANDING PANTS [WIDE FIT] 3color", "price": 46784, "discount": 31, "source": "W컨셉", "image": "https://product-image.wconcept.co.kr/productimg/image/img9/62/302685762_BB30949.jpg?RS=374", "sale_price": 46784, "link": "https://www.wconcept.co.kr/Product/302685762", "offers": [{"source": "W컨셉", "sale_price": 46784, "discount": 31, "link": "https://www.wconcept.co.kr/Product/302685762"}], "best_price": 46784, "max_discount": 31, "num_sources": 1, "original_price": 67803, "overall_rank": 32}, {"category": "하의", "brand": "MYCOB", "name": "포시즌 테이퍼드핏 워셔블 밴딩 슬랙스 ver.2 (베이지)", "price": 29900, "discount": 62, "source": "댄블", "image": "https://ds1l559sry31l.cloudfront.net/media/clothes/49982fb8-18a3-48a6-b91b-1e69da8c9973.png?w=600&f=webp&q=85", "sale_price": 29900, "link": "https://danble.co.kr/product/26186", "offers": [{"source": "댄블", "sale_price": 29900, "discount": 62, "link": "https://danble.co.kr/product/26186"}], "best_price": 29900, "max_discount": 62, "num_sources": 1, "original_price": 78684, "overall_rank": 11}, {"category": "하의", "brand": "HOOANGS", "name": "쿨 썸머 데님 밴딩 여름 청바지 팬츠", "price": 24800, "discount": 71, "source": "댄블", "image": "https://ds1l559sry31l.cloudfront.net/media/clothes/05191098-32bd-4435-b7db-e674bc06cbe8.jpg?w=800&f=webp&q=100", "sale_price": 24800, "link": "https://danble.co.kr/product/123336", "offers": [{"source": "댄블", "sale_price": 24800, "discount": 71, "link": "https://danble.co.kr/product/123336"}], "best_price": 24800, "max_discount": 71, "num_sources": 1, "original_price": 85517, "overall_rank": 7}, {"category": "하의", "brand": "BELIVUS", "name": "원턱 와이드 치노팬츠 빅사이즈 반바지", "price": 29800, "discount": 33, "source": "댄블", "image": "https://ds1l559sry31l.cloudfront.net/media/clothes/32373e6e-aa77-4bda-8066-927513368c67.jpg?w=800&f=webp&q=100", "sale_price": 29800, "link": "https://danble.co.kr/product/66460", "offers": [{"source": "댄블", "sale_price": 29800, "discount": 33, "link": "https://danble.co.kr/product/66460"}], "best_price": 29800, "max_discount": 33, "num_sources": 1, "original_price": 44478, "overall_rank": 31}, {"category": "하의", "brand": "NIKE", "name": "드라이 핏 파크 3 니트 쇼츠 반바지", "price": 19500, "discount": 22, "source": "댄블", "image": "https://ds1l559sry31l.cloudfront.net/media/clothes/865e21c4-3760-445a-8fe6-13bbdf86552e.jpg?w=800&f=webp&q=100", "sale_price": 19500, "link": "https://danble.co.kr/product/148332", "offers": [{"source": "댄블", "sale_price": 19500, "discount": 22, "link": "https://danble.co.kr/product/148332"}], "best_price": 19500, "max_discount": 22, "num_sources": 1, "original_price": 25000, "overall_rank": 37}, {"category": "하의", "brand": "클라쓰업", "name": "워드 남자 아이스 쿨링 투핀턱 스판 와이드 슬랙스", "price": 23715, "discount": 66, "source": "하이버", "image": "https://image.brandi.co.kr/cproduct/2025/05/16/SB000000000173729615_1747407564617_image1_S.jpg", "sale_price": 23715, "link": "https://www.hiver.co.kr/products/178472769", "offers": [{"source": "하이버", "sale_price": 23715, "discount": 66, "link": "https://www.hiver.co.kr/products/178472769"}], "best_price": 23715, "max_discount": 66, "num_sources": 1, "original_price": 69750, "overall_rank": 8}, {"category": "신발", "brand": "나이키", "name": "페가수스 42 M (서밋 화이트 등)", "price": 121680, "discount": 28, "source": "무신사", "image": "https://image.msscdn.net/thumbnails/images/goods_img/20260402/6245026/6245026_17788064770202_500.jpg?w=780", "sale_price": 121680, "link": "https://www.musinsa.com/products/6245026", "offers": [{"source": "무신사", "sale_price": 121680, "discount": 28, "link": "https://www.musinsa.com/products/6245026"}], "best_price": 121680, "max_discount": 28, "num_sources": 1, "original_price": 169000, "overall_rank": 35}, {"category": "신발", "brand": "크록스", "name": "에코 시티 어드벤쳐 클로그 엘리펀트", "price": 119000, "discount": 0, "source": "무신사", "image": "https://image.msscdn.net/thumbnails/images/goods_img/20260504/6415726/6415726_17788140162641_500.jpg?w=780", "sale_price": 119000, "link": "https://www.musinsa.com/products/6415726", "offers": [{"source": "무신사", "sale_price": 119000, "discount": 0, "link": "https://www.musinsa.com/products/6415726"}], "best_price": 119000, "max_discount": 0, "num_sources": 1, "original_price": 119000, "overall_rank": 44}, {"category": "신발", "brand": "반스", "name": "스케이트 하프 캡 블랙:화이트", "price": 69300, "discount": 30, "source": "무신사", "image": "https://image.msscdn.net/thumbnails/images/goods_img/20260406/6260909/6260909_17758017000387_500.jpg?w=780", "sale_price": 69300, "link": "https://www.musinsa.com/products/6260909", "offers": [{"source": "무신사", "sale_price": 69300, "discount": 30, "link": "https://www.musinsa.com/products/6260909"}], "best_price": 69300, "max_discount": 30, "num_sources": 1, "original_price": 99000, "overall_rank": 33}, {"category": "신발", "brand": "크록스", "name": "에코 웨이브 엘리펀트", "price": 44990, "discount": 55, "source": "무신사", "image": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6021836/6021836_17732823157261_500.jpg?w=780", "sale_price": 44990, "link": "https://www.musinsa.com/products/6021836", "offers": [{"source": "무신사", "sale_price": 44990, "discount": 55, "link": "https://www.musinsa.com/products/6021836"}], "best_price": 44990, "max_discount": 55, "num_sources": 1, "original_price": 99978, "overall_rank": 15}, {"category": "신발", "brand": "버켄스탁", "name": "토키오 2 스웨이드 샌들", "price": 228000, "discount": 36, "source": "W컨셉", "image": "https://product-image.wconcept.co.kr/productimg/image/img9/70/308620570_GH86866.jpg?RS=374", "sale_price": 228000, "link": "https://www.wconcept.co.kr/Product/308620570", "offers": [{"source": "W컨셉", "sale_price": 228000, "discount": 36, "link": "https://www.wconcept.co.kr/Product/308620570"}], "best_price": 228000, "max_discount": 36, "num_sources": 1, "original_price": 356250, "overall_rank": 28}, {"category": "신발", "brand": "아워레가시(아디다스)", "name": "삼바 LX 프라이자잇 커피화이트 KI4762", "price": 251900, "discount": 15, "source": "W컨셉", "image": "https://product-image.wconcept.co.kr/productimg/image/img9/95/308722995_QY65000.jpg?RS=374", "sale_price": 251900, "link": "https://www.wconcept.co.kr/Product/308722995", "offers": [{"source": "W컨셉", "sale_price": 251900, "discount": 15, "link": "https://www.wconcept.co.kr/Product/308722995"}], "best_price": 251900, "max_discount": 15, "num_sources": 1, "original_price": 296353, "overall_rank": 40}, {"category": "신발", "brand": "파라부트", "name": "1908 18 바스 MARRON 보트 로퍼", "price": 399000, "discount": 13, "source": "W컨셉", "image": "https://product-image.wconcept.co.kr/productimg/image/img1/25/308705125_GG19045.jpg?RS=374", "sale_price": 399000, "link": "https://www.wconcept.co.kr/Product/308705125", "offers": [{"source": "W컨셉", "sale_price": 399000, "discount": 13, "link": "https://www.wconcept.co.kr/Product/308705125"}], "best_price": 399000, "max_discount": 13, "num_sources": 1, "original_price": 458621, "overall_rank": 41}, {"category": "신발", "brand": "살로몬", "name": "XT-6 시리즈 트레일 러닝화", "price": 99000, "discount": 64, "source": "하이버", "image": "https://image.brandi.co.kr/cproduct/2026/07/28/SB000000000178959414_1785249617039_image1_S.png", "sale_price": 99000, "link": "https://www.hiver.co.kr/products/183595831", "offers": [{"source": "하이버", "sale_price": 99000, "discount": 64, "link": "https://www.hiver.co.kr/products/183595831"}], "best_price": 99000, "max_discount": 64, "num_sources": 1, "original_price": 275000, "overall_rank": 9}, {"category": "신발", "brand": "나이키", "name": "슈프림 에어포스", "price": 89000, "discount": 72, "source": "하이버", "image": "https://image.brandi.co.kr/cproduct/2026/07/31/SB000000000178987301_1785508521131_image1_S.png", "sale_price": 89000, "link": "https://www.hiver.co.kr/products/183623611", "offers": [{"source": "하이버", "sale_price": 89000, "discount": 72, "link": "https://www.hiver.co.kr/products/183623611"}], "best_price": 89000, "max_discount": 72, "num_sources": 1, "original_price": 317857, "overall_rank": 4}, {"category": "신발", "brand": "뉴발란스", "name": "1906 남여공용 운동화", "price": 82175, "discount": 56, "source": "하이버", "image": "https://image.brandi.co.kr/cproduct/2026/06/26/SB000000000178480442_1782486166319_image1_S.jpg", "sale_price": 82175, "link": "https://www.hiver.co.kr/products/183055197", "offers": [{"source": "하이버", "sale_price": 82175, "discount": 56, "link": "https://www.hiver.co.kr/products/183055197"}], "best_price": 82175, "max_discount": 56, "num_sources": 1, "original_price": 186761, "overall_rank": 13}, {"category": "신발", "brand": "CUSTOMADE", "name": "3cm 소가죽 스웨이드 로퍼 루이스", "price": 80600, "discount": 35, "source": "댄블", "image": "https://ds1l559sry31l.cloudfront.net/media/clothes/7e0f3d4f-9109-41a7-be67-7406cfa662d4.jpg?w=800&f=webp&q=100", "sale_price": 80600, "link": "https://danble.co.kr/product/50009", "offers": [{"source": "댄블", "sale_price": 80600, "discount": 35, "link": "https://danble.co.kr/product/50009"}], "best_price": 80600, "max_discount": 35, "num_sources": 1, "original_price": 124000, "overall_rank": 30}, {"category": "신발", "brand": "NIKE", "name": "국내매장판 보메로 18 서밋 화이트", "price": 149800, "discount": 50, "source": "댄블", "image": "https://ds1l559sry31l.cloudfront.net/media/clothes/1008d9ac-225d-4646-94b2-d79934f6c56c.jpg?w=800&f=webp&q=100", "sale_price": 149800, "link": "https://danble.co.kr/product/128003", "offers": [{"source": "댄블", "sale_price": 149800, "discount": 50, "link": "https://danble.co.kr/product/128003"}], "best_price": 149800, "max_discount": 50, "num_sources": 1, "original_price": 299600, "overall_rank": 19}];
+
+const CATEGORIES = ["전체", "상의", "아우터", "하의", "신발"];
+const SOURCES = ["전체", "무신사", "W컨셉", "하이버", "댄블"];
+const MAIN_TABS = [
+  {id: "browse", label: "쇼핑몰별 보기"},
+  {id: "ranking", label: "종합 랭킹"},
+];
+
+let state = { mainTab: "browse", category: "전체", source: "전체", sort: "discount_desc", query: "" };
+
+function renderMainTabs() {
+  const el = document.getElementById('mainTabs');
+  el.innerHTML = MAIN_TABS.map(t =>
+    `<button class="main-tab ${state.mainTab===t.id?'active':''}" data-tab="${t.id}">${t.label}</button>`
+  ).join('');
+  el.querySelectorAll('.main-tab').forEach(btn => {
+    btn.onclick = () => {
+      state.mainTab = btn.dataset.tab;
+      if (state.mainTab === 'ranking') { state.sort = 'rank'; }
+      else { state.sort = 'discount_desc'; }
+      renderAll();
+    };
+  });
+}
+
+function renderTabs() {
+  const catTabs = document.getElementById('catTabs');
+  catTabs.innerHTML = CATEGORIES.map(c =>
+    `<button class="cat-tab ${state.category===c?'active':''}" data-cat="${c}">${c}</button>`
+  ).join('');
+  catTabs.querySelectorAll('.cat-tab').forEach(btn => {
+    btn.onclick = () => { state.category = btn.dataset.cat; renderAll(); };
+  });
+
+  const srcTabs = document.getElementById('sourceTabs');
+  const showSourceTabs = state.mainTab === 'browse';
+  srcTabs.style.display = showSourceTabs ? 'flex' : 'none';
+  srcTabs.innerHTML = SOURCES.map(s =>
+    `<button class="source-tab ${state.source===s?'active':''}" data-src="${s}">${s}</button>`
+  ).join('');
+  srcTabs.querySelectorAll('.source-tab').forEach(btn => {
+    btn.onclick = () => { state.source = btn.dataset.src; renderAll(); };
+  });
+
+  const sortRow = document.querySelector('.sort-row');
+  const sortSelect = document.getElementById('sortSelect');
+  if (state.mainTab === 'ranking') {
+    sortSelect.style.display = 'none';
+    sortRow.querySelector('label').style.display = 'none';
+  } else {
+    sortSelect.style.display = '';
+    sortRow.querySelector('label').style.display = '';
+  }
+}
+
+function fmt(n) { return n.toLocaleString('ko-KR') + '원'; }
+
+function renderGrid() {
+  let items = PRODUCTS.filter(p => {
+    if (state.category !== "전체" && p.category !== state.category) return false;
+    if (state.mainTab === 'browse' && state.source !== "전체" && p.source !== state.source) return false;
+    if (state.query) {
+      const q = state.query.toLowerCase();
+      if (!p.brand.toLowerCase().includes(q) && !p.name.toLowerCase().includes(q)) return false;
+    }
+    return true;
+  });
+
+  if (state.mainTab === 'ranking') {
+    items.sort((a, b) => a.overall_rank - b.overall_rank);
+  } else {
+    items.sort((a, b) => {
+      switch(state.sort) {
+        case 'discount_desc': return b.discount - a.discount;
+        case 'price_asc': return a.sale_price - b.sale_price;
+        case 'price_desc': return b.sale_price - a.sale_price;
+        default: return 0;
+      }
+    });
+  }
+
+  document.getElementById('resultCount').textContent = `총 ${items.length}개 상품`;
+
+  const grid = document.getElementById('productGrid');
+  if (items.length === 0) {
+    grid.innerHTML = '<div class="empty-state">조건에 맞는 상품이 없습니다.</div>';
+    return;
+  }
+
+  grid.innerHTML = items.map(p => {
+    const isMulti = p.offers.length > 1;
+    const topBadge = state.mainTab === 'ranking'
+      ? `<div class="rank-badge">${p.overall_rank}</div>`
+      : (isMulti ? `<div class="multi-badge">${p.offers.length}곳 비교</div>` : `<div class="badge-source src-${p.source}">${p.source}</div>`);
+
+    let compareHtml = '';
+    if (isMulti) {
+      const sortedOffers = [...p.offers].sort((a,b) => a.sale_price - b.sale_price);
+      const minPrice = sortedOffers[0].sale_price;
+      compareHtml = `
+        <div class="compare-box">
+          <div class="compare-title">판매처별 가격비교</div>
+          ${sortedOffers.map(o => `
+            <div class="compare-row ${o.sale_price===minPrice?'best':''}">
+              <span class="src-name">${o.source}${o.sale_price===minPrice?' ✓최저가':''}</span>
+              <span class="price-val">${fmt(o.sale_price)}</span>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    return `
+    <a class="card" href="${p.link || '#'}" target="_blank" rel="noopener noreferrer">
+      <div class="card-img">
+        ${p.image ? `<img src="${p.image}" alt="${p.name}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=&quot;no-img&quot;><span class=&quot;icon&quot;>🛍️</span>이미지 준비중</div>'">` : '<div class="no-img"><span class="icon">🛍️</span>이미지 준비중</div>'}
+        ${topBadge}
+        ${p.discount > 0 ? `<div class="badge-discount">-${p.discount}%</div>` : ''}
+      </div>
+      <div class="card-body">
+        <div class="brand">${p.brand}</div>
+        <div class="name">${p.name}</div>
+        <div class="price-row">
+          ${p.discount > 0 ? `<span class="original-price">${fmt(p.original_price)}</span>` : ''}
+          <span class="sale-price">${fmt(p.sale_price)}</span>
+          ${p.discount > 0 ? `<span class="discount-pct">${p.discount}%</span>` : ''}
+        </div>
+        ${compareHtml}
+        <div class="category-tag">
+          <span>${p.category} · ${isMulti ? p.offers.length + '개 사이트' : p.source}</span>
+          <span class="view-link">최저가 보기 →</span>
+        </div>
+      </div>
+    </a>
+  `;
+  }).join('');
+}
+
+function renderAll() {
+  renderMainTabs();
+  renderTabs();
+  renderGrid();
+}
+
+document.getElementById('searchInput').addEventListener('input', (e) => {
+  state.query = e.target.value.trim();
+  renderGrid();
+});
+document.getElementById('sortSelect').addEventListener('change', (e) => {
+  state.sort = e.target.value;
+  renderGrid();
+});
+
+renderAll();
+</script>
+</body>
+</html>
