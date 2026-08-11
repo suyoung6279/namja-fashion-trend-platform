@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>남자 패션 트렌드 통합 플랫폼 — 랭킹 · 가격비교</title>
+<title>스타일 스와이프 — 취향 학습 추천</title>
 <style>
   :root {
     --bg: #0f1115;
@@ -14,358 +14,667 @@
     --text-dim: #9aa0ac;
     --accent: #ff5757;
     --accent2: #4d9fff;
+    --like: #7ee787;
+    --nope: #ff5757;
   }
-  * { box-sizing: border-box; margin:0; padding:0; }
+  * { box-sizing: border-box; margin:0; padding:0; -webkit-tap-highlight-color: transparent; }
   body {
     font-family: -apple-system, "Pretendard", "Noto Sans KR", sans-serif;
     background: var(--bg);
     color: var(--text);
     line-height: 1.5;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
   }
   header {
-    position: sticky; top:0; z-index: 100;
-    background: rgba(15,17,21,0.95);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid var(--border);
-    padding: 18px 24px;
+    padding: 18px 24px 10px;
+    text-align: center;
   }
-  .header-inner {
-    max-width: 1400px; margin: 0 auto;
-    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
-  }
-  h1 { font-size: 20px; font-weight: 800; }
+  h1 { font-size: 19px; font-weight: 800; }
   h1 span { color: var(--accent); }
-  .subtitle { font-size: 12.5px; color: var(--text-dim); margin-top: 2px; }
-  .search-box { flex: 1; max-width: 360px; min-width: 200px; }
-  .search-box input {
-    width: 100%; padding: 10px 14px; border-radius: 10px;
-    border: 1px solid var(--border); background: var(--card); color: var(--text);
-    font-size: 14px;
-  }
-  .search-box input:focus { outline: none; border-color: var(--accent2); }
+  .subtitle { font-size: 12.5px; color: var(--text-dim); margin-top: 4px; }
 
-  .main-tabs {
-    max-width: 1400px; margin: 20px auto 0; padding: 0 24px;
-    display: flex; gap: 10px;
-  }
-  .main-tab {
-    padding: 11px 22px; border-radius: 10px 10px 0 0; border: 1px solid var(--border); border-bottom: none;
-    background: var(--card); color: var(--text-dim); cursor: pointer; font-size: 14px; font-weight: 700;
-  }
-  .main-tab.active { background: var(--accent); color: white; border-color: var(--accent); }
-
-  .controls {
-    max-width: 1400px; margin: 0 auto; padding: 16px 24px 0;
-    border-top: 1px solid var(--border);
-  }
-  .cat-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 0 14px; }
-  .cat-tab {
-    padding: 9px 18px; border-radius: 999px; border: 1px solid var(--border);
-    background: var(--card); color: var(--text-dim); cursor: pointer;
-    font-size: 13.5px; font-weight: 600; transition: all .15s;
-  }
-  .cat-tab:hover { border-color: var(--accent2); color: var(--text); }
-  .cat-tab.active { background: var(--accent); border-color: var(--accent); color: white; }
-
-  .source-tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom: 16px; }
-  .source-tab {
-    padding: 6px 14px; border-radius: 8px; border: 1px solid var(--border);
-    background: transparent; color: var(--text-dim); cursor: pointer; font-size: 12.5px; font-weight: 600;
-  }
-  .source-tab.active { background: var(--card); color: var(--text); border-color: var(--accent2); }
-
-  .sort-row { display:flex; align-items:center; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
-  .sort-row label { font-size: 12.5px; color: var(--text-dim); }
-  .sort-row select {
-    background: var(--card); color: var(--text); border: 1px solid var(--border);
-    border-radius: 8px; padding: 7px 10px; font-size: 13px;
-  }
-  .result-count { margin-left: auto; font-size: 12.5px; color: var(--text-dim); }
-
-  .grid {
-    max-width: 1400px; margin: 0 auto; padding: 0 24px 60px;
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 18px;
-  }
-  .card {
-    background: var(--card); border: 1px solid var(--border); border-radius: 14px;
-    overflow: hidden; transition: all .2s; cursor: pointer;
-    text-decoration: none; color: inherit; display: block; position: relative;
-  }
-  .card:hover { background: var(--card-hover); transform: translateY(-3px); border-color: #3a3f4a; }
-  .card-img {
-    width: 100%; aspect-ratio: 3/4; background: #14161b;
-    display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative;
-  }
-  .card-img img { width: 100%; height: 100%; object-fit: cover; display:block; }
-  .no-img {
-    color: #4a4f5a; font-size: 13px; text-align:center; padding: 10px;
-    display: flex; flex-direction: column; align-items: center; gap: 6px;
-  }
-  .no-img .icon { font-size: 28px; opacity: 0.4; }
-  .rank-badge {
-    position: absolute; top: 8px; left: 8px;
-    width: 26px; height: 26px; border-radius: 8px;
-    background: rgba(0,0,0,0.75); color: #ffce54; font-weight: 800; font-size: 13px;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .badge-source {
-    position: absolute; top: 8px; left: 8px;
-    font-size: 10.5px; font-weight: 700; padding: 4px 9px; border-radius: 999px;
-    color: white; letter-spacing: 0.2px;
-  }
-  .src-무신사 { background: #ff5757; }
-  .src-W컨셉 { background: #7b5eff; }
-  .src-하이버 { background: #ff6b35; }
-  .src-댄블 { background: #2a63ff; }
-  .multi-badge {
-    position: absolute; top: 8px; left: 8px;
-    font-size: 10.5px; font-weight: 700; padding: 4px 9px; border-radius: 999px;
-    color: #0f1115; background: #ffce54;
+  main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px 30px;
   }
 
-  .badge-discount {
-    position: absolute; top: 8px; right: 8px;
-    background: rgba(0,0,0,0.75); color: #ffce54; font-weight: 800; font-size: 12px;
-    padding: 4px 8px; border-radius: 6px;
+  /* --- Swipe deck --- */
+  .deck-wrap { width: 100%; max-width: 380px; }
+  .deck {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 3/4.3;
+    margin-bottom: 22px;
   }
-  .card-body { padding: 13px 14px 15px; }
-  .brand { font-size: 12.5px; color: var(--text-dim); font-weight: 700; margin-bottom: 3px; }
-  .name {
-    font-size: 13.5px; font-weight: 600; margin-bottom: 10px; min-height: 38px;
-    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  .swipe-card {
+    position: absolute;
+    inset: 0;
+    border-radius: 20px;
+    overflow: hidden;
+    background: var(--card);
+    border: 1px solid var(--border);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    cursor: grab;
+    user-select: none;
+    touch-action: none;
+    transition: transform .25s ease, opacity .25s ease;
   }
-  .price-row { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
-  .original-price { font-size: 12px; color: #5a5f6a; text-decoration: line-through; }
-  .sale-price { font-size: 17px; font-weight: 800; color: var(--text); }
-  .discount-pct { font-size: 13px; font-weight: 800; color: var(--accent); }
+  .swipe-card:active { cursor: grabbing; }
+  .swipe-card img {
+    width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none;
+  }
+  .swipe-card .tag-badge {
+    position: absolute; top: 12px; left: 12px;
+    background: rgba(0,0,0,0.6); color: white; font-size: 11.5px; font-weight: 700;
+    padding: 5px 11px; border-radius: 999px; backdrop-filter: blur(4px);
+  }
+  .stamp {
+    position: absolute; top: 26px; padding: 7px 14px; border-radius: 8px;
+    font-size: 20px; font-weight: 900; letter-spacing: 1px; opacity: 0; z-index: 5;
+    border: 3px solid; transform: rotate(-18deg);
+  }
+  .stamp.like { left: 20px; color: var(--like); border-color: var(--like); }
+  .stamp.nope { right: 20px; color: var(--nope); border-color: var(--nope); transform: rotate(18deg); }
 
-  .compare-box {
-    margin-top: 10px; padding: 8px 10px; background: rgba(77,159,255,0.08);
-    border: 1px solid rgba(77,159,255,0.25); border-radius: 8px;
+  .deck-empty {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    text-align: center; color: var(--text-dim); font-size: 13.5px; padding: 30px;
   }
-  .compare-title { font-size: 10.5px; color: var(--accent2); font-weight: 700; margin-bottom: 6px; }
-  .compare-row {
-    display: flex; justify-content: space-between; align-items: center;
-    font-size: 12px; padding: 3px 0;
-  }
-  .compare-row .src-name { font-weight: 700; }
-  .compare-row.best { color: #7ee787; }
-  .compare-row .price-val { font-weight: 700; }
 
-  .category-tag {
-    margin-top: 8px; font-size: 11px; color: var(--text-dim);
-    border-top: 1px dashed var(--border); padding-top: 8px;
-    display: flex; justify-content: space-between; align-items: center;
+  .swipe-actions { display: flex; justify-content: center; gap: 22px; margin-bottom: 8px; }
+  .swipe-btn {
+    width: 60px; height: 60px; border-radius: 50%; border: 1px solid var(--border);
+    background: var(--card); font-size: 24px; cursor: pointer; display: flex;
+    align-items: center; justify-content: center; transition: transform .1s;
   }
-  .view-link { color: var(--accent2); font-weight: 600; }
+  .swipe-btn:active { transform: scale(0.9); }
+  .swipe-btn.nope { color: var(--nope); }
+  .swipe-btn.like { color: var(--like); }
 
-  .empty-state { text-align: center; padding: 80px 20px; color: var(--text-dim); grid-column: 1 / -1; }
+  .analyze-now-btn {
+    display: block; margin: 4px auto 0; padding: 8px 4px; background: none; border: none;
+    color: var(--text-dim); font-size: 12.5px; text-decoration: underline; cursor: pointer;
+  }
+  .analyze-now-btn:hover { color: var(--text); }
+
+  .progress-text { text-align: center; font-size: 12px; color: var(--text-dim); margin-bottom: 4px; }
+
+  /* --- Result screen --- */
+  .result-wrap { width: 100%; max-width: 560px; display: none; }
+  .result-wrap.active { display: block; }
+  .deck-wrap.hidden { display: none; }
+
+  .taste-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+    padding: 22px; margin-bottom: 20px;
+  }
+  .taste-card h2 { font-size: 16px; margin-bottom: 14px; }
+  .taste-bar-row { margin-bottom: 10px; }
+  .taste-bar-label { display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 5px; }
+  .taste-bar-label b { color: var(--text); }
+  .taste-bar-label span { color: var(--text-dim); }
+  .taste-bar-track { height: 8px; border-radius: 999px; background: #14161b; overflow: hidden; }
+  .taste-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent2), var(--accent)); border-radius: 999px; }
+
+  .retry-btn {
+    width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border);
+    background: var(--card); color: var(--text); font-weight: 700; font-size: 13px; cursor: pointer; margin-top: 4px;
+  }
+
+  .rec-title { font-size: 15px; font-weight: 800; margin: 22px 0 12px; }
+  .rec-category-block { margin-bottom: 22px; }
+  .rec-subtitle {
+    font-size: 12.5px; font-weight: 800; color: var(--accent2); margin-bottom: 10px;
+    padding-bottom: 6px; border-bottom: 1px solid var(--border);
+  }
+  .rec-count { color: var(--text-dim); font-weight: 600; }
+  .rec-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px;
+  }
+  .more-btn {
+    display: block; width: 100%; margin-top: 12px; padding: 10px;
+    border-radius: 10px; border: 1px dashed var(--border); background: none;
+    color: var(--text-dim); font-size: 12.5px; font-weight: 700; cursor: pointer;
+  }
+  .more-btn:hover { color: var(--text); border-color: var(--accent2); }
+  .rec-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    overflow: hidden; text-decoration: none; color: inherit; display: block;
+  }
+  .rec-card:hover { background: var(--card-hover); }
+  .rec-img { width: 100%; aspect-ratio: 3/4; background: #14161b; overflow: hidden; }
+  .rec-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .rec-body { padding: 10px 11px 12px; }
+  .rec-brand { font-size: 11px; color: var(--text-dim); font-weight: 700; margin-bottom: 2px; }
+  .rec-name { font-size: 12px; font-weight: 600; margin-bottom: 6px; min-height: 32px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .rec-price { font-size: 13.5px; font-weight: 800; }
+  .rec-match { font-size: 10px; color: var(--like); font-weight: 700; margin-top: 4px; }
 
   footer {
-    text-align: center; padding: 30px; color: var(--text-dim); font-size: 12px;
-    border-top: 1px solid var(--border);
+    text-align: center; padding: 22px; color: var(--text-dim); font-size: 11.5px;
+    border-top: 1px solid var(--border); max-width: 700px; margin: 0 auto;
   }
 
-  @media (max-width: 640px) {
-    .grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
-    h1 { font-size: 17px; }
+  @media (max-width: 480px) {
+    .deck-wrap { max-width: 320px; }
   }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="header-inner">
-    <div>
-      <h1>남자 패션 <span>트렌드 통합</span> 플랫폼</h1>
-      <div class="subtitle">무신사 · W컨셉 · 하이버 · 댄블 실시간 랭킹 한눈에 비교</div>
-    </div>
-    <div class="search-box">
-      <input type="text" id="searchInput" placeholder="브랜드 또는 상품명 검색...">
-    </div>
-  </div>
+  <h1>스타일 <span>스와이프</span></h1>
+  <div class="subtitle">코디 사진을 넘기면서 취향을 배우고, 맞는 상품을 추천받으세요</div>
 </header>
 
-<div class="main-tabs" id="mainTabs"></div>
-
-<div class="controls">
-  <div class="cat-tabs" id="catTabs"></div>
-  <div class="source-tabs" id="sourceTabs"></div>
-  <div class="sort-row">
-    <label for="sortSelect">정렬</label>
-    <select id="sortSelect">
-      <option value="discount_desc">할인율 높은순</option>
-      <option value="price_asc">가격 낮은순</option>
-      <option value="price_desc">가격 높은순</option>
-    </select>
-    <div class="result-count" id="resultCount"></div>
+<main>
+  <div class="deck-wrap" id="deckWrap">
+    <div class="progress-text" id="progressText"></div>
+    <div class="deck" id="deck"></div>
+    <div class="swipe-actions">
+      <button class="swipe-btn nope" id="btnNope" title="별로예요">✕</button>
+      <button class="swipe-btn like" id="btnLike" title="좋아요">✓</button>
+    </div>
+    <button class="analyze-now-btn" id="btnAnalyzeNow">여기까지 분석하기</button>
   </div>
-</div>
 
-<div class="grid" id="productGrid"></div>
+  <div class="result-wrap" id="resultWrap">
+    <div class="taste-card">
+      <h2>취향 분석 결과</h2>
+      <div id="tasteBars"></div>
+      <button class="retry-btn" id="retryBtn">다시 스와이프하기</button>
+    </div>
+    <div class="rec-title">이런 아이템은 어때요?</div>
+    <div id="recGrid"></div>
+  </div>
+</main>
 
 <footer>
-  데이터 출처: 무신사(musinsa.com) · W컨셉(wconcept.co.kr) · 하이버(hiver.co.kr) · 댄블(danble.co.kr) 실시간 랭킹 기준 (2026년 8월 조사)<br>
-  가격/할인율은 조사 시점 기준이며 실시간으로 변동될 수 있습니다. 원가는 판매가와 할인율로 역산한 추정치입니다. 카드를 클릭하면 최저가 판매처의 실제 상품 페이지로 이동합니다.<br>
-  "동일 상품 판매처 비교"는 자동 텍스트 매칭으로 확인된 것만 표시하며, 매칭되지 않은 동일 상품이 더 있을 수 있습니다.
+  코디 사진 출처: onthelook.co.kr (2026년 8월 조사, 서비스 종료 예정 전 수집). 스타일 태그는 원 사이트의 분류를 그대로 사용했습니다.<br>
+  추천 상품은 같은 8개 스타일 태그로 무신사에서 직접 검색해 미리 모아둔 실제 상품(59개)입니다 — 검색어 기반이라 태그와의 정합성은 태그마다 편차가 있고("모던캐주얼"은 특히 느슨합니다), 정식 서비스라면 이미지 기반 스타일 분류가 필요합니다.<br>
+  스와이프 기록은 이 브라우저에만 저장됩니다(로그인/서버 없음).
 </footer>
 
 <script>
-const PRODUCTS = [{"category": "상의", "brand": "언더오프", "name": "롤업 슬리브 크롭 반팔 티셔츠 블랙", "price": 22320, "discount": 41, "source": "무신사", "image": "https://image.msscdn.net/thumbnails/images/goods_img/20260602/6593921/6593921_17803822944311_500.jpg?w=780", "sale_price": 22320, "link": "https://www.musinsa.com/products/6593921", "offers": [{"source": "무신사", "sale_price": 22320, "discount": 41, "link": "https://www.musinsa.com/products/6593921"}], "best_price": 22320, "max_discount": 41, "num_sources": 1, "original_price": 37831, "overall_rank": 22}, {"category": "상의", "brand": "언더오프", "name": "롤업 슬리브 크롭 반팔 티셔츠 버건디", "price": 22320, "discount": 41, "source": "무신사", "image": "https://image.msscdn.net/thumbnails/images/goods_img/20260602/6593924/6593924_17803822672936_500.jpg?w=780", "sale_price": 22320, "link": "https://www.musinsa.com/products/6593924", "offers": [{"source": "무신사", "sale_price": 22320, "discount": 41, "link": "https://www.musinsa.com/products/6593924"}], "best_price": 22320, "max_discount": 41, "num_sources": 1, "original_price": 37831, "overall_rank": 23}, {"category": "상의", "brand": "트릴리온", "name": "내츄럴 리조트 롤업 하프 셔츠 3color", "price": 29900, "discount": 38, "source": "무신사", "image": "https://image.msscdn.net/thumbnails/images/goods_img/20260414/6307599/6307599_17767587812286_500.jpg?w=780", "sale_price": 29900, "link": "https://www.musinsa.com/products/6307599", "offers": [{"source": "무신사", "sale_price": 29900, "discount": 38, "link": "https://www.musinsa.com/products/6307599"}], "best_price": 29900, "max_discount": 38, "num_sources": 1, "original_price": 48226, "overall_rank": 26}, {"category": "상의", "brand": "플루크(FLUKE)", "name": "어드벤쳐 트럭커 포켓 반팔티셔츠 4color", "price": 15308, "discount": 53, "source": "W컨셉", "image": "https://product-image.wconcept.co.kr/productimg/image/img9/36/300968436_QJ70721.jpg?RS=374", "sale_price": 15308, "link": "https://www.wconcept.co.kr/Product/300968436", "offers": [{"source": "W컨셉", "sale_price": 15308, "discount": 53, "link": "https://www.wconcept.co.kr/Product/300968436"}], "best_price": 15308, "max_discount": 53, "num_sources": 1, "original_price": 32570, "overall_rank": 16}, {"category": "상의", "brand": "플루크(FLUKE)", "name": "내셔널 마운틴 피그먼트 반팔티 4color", "price": 22360, "discount": 47, "source": "W컨셉", "image": "https://product-image.wconcept.co.kr/productimg/image/img9/67/302669567_IL55893.jpg?RS=374", "sale_price": 22360, "link": "https://www.wconcept.co.kr/Product/302669567", "offers": [{"source": "W컨셉", "sale_price": 22360, "discount": 47, "link": "https://www.wconcept.co.kr/Product/302669567"}], "best_price": 22360, "max_discount": 47, "num_sources": 1, "original_price": 42189, "overall_rank": 20}, {"category": "상의", "brand": "MINIMAL PROJECT", "name": "로버스트 헤비 오버핏 반팔티셔츠 8color (2PACK)", "price": 32198, "discount": 55, "source": "W컨셉", "image": "https://product-image.wconcept.co.kr/productimg/image/img9/47/307346447_JH14008.jpg?RS=374", "sale_price": 32198, "link": "https://www.wconcept.co.kr/Product/307346447", "offers": [{"source": "W컨셉", "sale_price": 32198, "discount": 55, "link": "https://www.wconcept.co.kr/Product/307346447"}], "best_price": 32198, "max_discount": 55, "num_sources": 1, "original_price": 71551, "overall_rank": 14}, {"category": "상의", "brand": "스투시", "name": "베이직 반팔티 2종 택1", "price": 29000, "discount": 76, "source": "하이버", "image": "https://image.brandi.co.kr/cproduct/2026/04/23/SB000000000178229551_1776940434666_image1_S.jpg", "sale_price": 29000, "link": "https://www.hiver.co.kr/products/182818198", "offers": [{"source": "하이버", "sale_price": 29000, "discount": 76, "link": "https://www.hiver.co.kr/products/182818198"}], "best_price": 29000, "max_discount": 76, "num_sources": 1, "original_price": 120833, "overall_rank": 2}, {"category": "상의", "brand": "폴로 랄프 로렌", "name": "PK반팔 카라티셔츠 (6컬러)", "price": 42300, "discount": 71, "source": "하이버", "image": "https://image.brandi.co.kr/cproduct/2026/06/05/SB000000000178390647_1780680764109_image1_S.jpg", "sale_price": 42300, "link": "https://www.hiver.co.kr/products/182966479", "offers": [{"source": "하이버", "sale_price": 42300, "discount": 71, "link": "https://www.hiver.co.kr/products/182966479"}], "best_price": 42300, "max_discount": 71, "num_sources": 1, "original_price": 145862, "overall_rank": 5}, {"category": "상의", "brand": "메종키츠네", "name": "그레이폭스 남녀 반팔 티셔츠", "price": 38900, "discount": 35, "source": "하이버", "image": "https://image.brandi.co.kr/cproduct/2026/04/28/SB000000000178279127_1777400593417_image1_S.jpg", "sale_price": 38900, "link": "https://www.hiver.co.kr/products/182855705", "offers": [{"source": "하이버", "sale_price": 38900, "discount": 35, "link": "https://www.hiver.co.kr/products/182855705"}], "best_price": 38900, "max_discount": 35, "num_sources": 1, "original_price": 59846, "overall_rank": 29}, {"category": "상의", "brand": "나이키", "name": "드라이핏 레젼드 반팔티 DX0989", "price": 18900, "discount": 72, "source": "댄블", "image": "https://image.brandi.co.kr/cproduct/2025/03/18/SB000000000170670780_1742316830827_image1_S.jpg", "sale_price": 17900, "link": "https://www.hiver.co.kr/products/175466788", "offers": [{"source": "댄블", "sale_price": 18900, "discount": 71, "link": "https://danble.co.kr/product/68940"}, {"source": "하이버", "sale_price": 17900, "discount": 72, "link": "https://www.hiver.co.kr/products/175466788"}], "best_price": 17900, "max_discount": 72, "num_sources": 2, "original_price": 63929, "overall_rank": 3}, {"category": "상의", "brand": "BIRBANTE", "name": "썸머 워셔블 스트라이프 카라 니트", "price": 39900, "discount": 41, "source": "댄블", "image": "https://ds1l559sry31l.cloudfront.net/media/clothes/12575c2a-7b21-4cda-a828-fb7bc5166b79.jpg?w=600&f=webp&q=85", "sale_price": 39900, "link": "https://danble.co.kr/product/48124", "offers": [{"source": "댄블", "sale_price": 39900, "discount": 41, "link": "https://danble.co.kr/product/48124"}], "best_price": 39900, "max_discount": 41, "num_sources": 1, "original_price": 67627, "overall_rank": 24}, {"category": "상의", "brand": "DOCENT", "name": "오픈카라 에어코튼 반팔니트 라이트그레이", "price": 39900, "discount": 50, "source": "댄블", "image": "https://ds1l559sry31l.cloudfront.net/media/clothes/fc82f6b7-cc8a-4c29-a16e-58ec4bf1c8d8.png?w=600&f=webp&q=85", "sale_price": 39900, "link": "https://danble.co.kr/product/214165", "offers": [{"source": "댄블", "sale_price": 39900, "discount": 50, "link": "https://danble.co.kr/product/214165"}], "best_price": 39900, "max_discount": 50, "num_sources": 1, "original_price": 79800, "overall_rank": 18}, {"category": "상의", "brand": "POLO RALPH LAUREN", "name": "포니 로고 반팔 티셔츠 블랙", "price": 28900, "discount": 58, "source": "댄블", "image": "https://ds1l559sry31l.cloudfront.net/media/clothes/fbb4ef5f-6635-4bac-bb9b-9a296f224685.jpg?w=800&f=webp&q=100", "sale_price": 28900, "link": "https://danble.co.kr/product/69120", "offers": [{"source": "댄블", "sale_price": 28900, "discount": 58, "link": "https://danble.co.kr/product/69120"}], "best_price": 28900, "max_discount": 58, "num_sources": 1, "original_price": 68810, "overall_rank": 12}, {"category": "아우터", "brand": "스파오", "name": "3-LAYER 테크니컬 윈드브레이커", "price": 64730, "discount": 28, "source": "무신사", "image": "https://image.msscdn.net/thumbnails/images/goods_img/20260720/6876831/6876831_17853924810722_500.png?w=780", "sale_price": 64730, "link": "https://www.musinsa.com/products/6876831", "offers": [{"source": "무신사", "sale_price": 64730, "discount": 28, "link": "https://www.musinsa.com/products/6876831"}], "best_price": 64730, "max_discount": 28, "num_sources": 1, "original_price": 89903, "overall_rank": 34}, {"category": "아우터", "brand": "블랙야크", "name": "클라이밍 스톤마스터 라이트 다운자켓#3 (5color)", "price": 239000, "discount": 20, "source": "무신사", "image": "https://image.msscdn.net/thumbnails/images/goods_img/20260723/6908583/6908583_17853877119438_500.jpg?w=780", "sale_price": 239000, "link": "https://www.musinsa.com/products/6908583", "offers": [{"source": "무신사", "sale_price": 239000, "discount": 20, "link": "https://www.musinsa.com/products/6908583"}], "best_price": 239000, "max_discount": 20, "num_sources": 1, "original_price": 298750, "overall_rank": 38}, {"category": "아우터", "brand": "아디다스", "name": "와플 클래식 트랙탑 블랙", "price": 108990, "discount": 16, "source": "무신사", "image": "https://image.msscdn.net/thumbnails/images/goods_img/20260127/5943429/5943429_17745057177730_500.jpg?w=780", "sale_price": 108990, "link": "https://www.musinsa.com/products/5943429", "offers": [{"source": "무신사", "sale_price": 108990, "discount": 16, "link": "https://www.musinsa.com/products/5943429"}], "best_price": 108990, "max_discount": 16, "num_sources": 1, "original_price": 129750, "overall_rank": 39}, {"category": "아우터", "brand": "꼼데가르송", "name": "[SS26] 레드 와펜 바람막이 캐주얼 자켓", "price": 186928, "discount": 24, "source": "W컨셉", "image": "https://product-image.wconcept.co.kr/productimg/image/img9/63/308711563_NO21409.jpg?RS=374", "sale_price": 186928, "link": "https://www.wconcept.co.kr/Product/308711563", "offers": [{"source": "W컨셉", "sale_price": 186928, "discount": 24, "link": "https://www.wconcept.co.kr/Product/308711563"}], "best_price": 186928, "max_discount": 24, "num_sources": 1, "original_price": 245958, "overall_rank": 36}, {"category": "아우터", "brand": "VALOREN", "name": "Green Shadow Line Jacket", "price": 1020000, "discount": 2, "source": "W컨셉", "image": "https://product-image.wconcept.co.kr/productimg/image/img9/36/305929736_LN80318.jpg?RS=374", "sale_price": 1020000, "link": "https://www.wconcept.co.kr/Product/305929736", "offers": [{"source": "W컨셉", "sale_price": 1020000, "discount": 2, "link": "https://www.wconcept.co.kr/Product/305929736"}], "best_price": 1020000, "max_discount": 2, "num_sources": 1, "original_price": 1040816, "overall_rank": 43}, {"category": "아우터", "brand": "꼼데가르송", "name": "레드와펜 가디건 블랙", "price": 92000, "discount": 80, "source": "하이버", "image": "https://image.brandi.co.kr/cproduct/2026/04/22/SB000000000178222333_1776867335287_image1_S.jpg", "sale_price": 92000, "link": "https://www.hiver.co.kr/products/182813990", "offers": [{"source": "하이버", "sale_price": 92000, "discount": 80, "link": "https://www.hiver.co.kr/products/182813990"}], "best_price": 92000, "max_discount": 80, "num_sources": 1, "original_price": 460000, "overall_rank": 1}, {"category": "아우터", "brand": "MAISON KITSUNE", "name": "그레이 폭스 헤드 남성 가디건 (블랙)", "price": 169000, "discount": 63, "source": "댄블", "image": "https://ds1l559sry31l.cloudfront.net/media/clothes/b239d99f-32df-4d82-909a-28630608919e.jpg?w=800&f=webp&q=100", "sale_price": 169000, "link": "https://danble.co.kr/product/111417", "offers": [{"source": "댄블", "sale_price": 169000, "discount": 63, "link": "https://danble.co.kr/product/111417"}], "best_price": 169000, "max_discount": 63, "num_sources": 1, "original_price": 456757, "overall_rank": 10}, {"category": "아우터", "brand": "STCO", "name": "DYED WASHING 어반 자켓 카키 (오버핏)", "price": 69000, "discount": 47, "source": "댄블", "image": "https://ds1l559sry31l.cloudfront.net/media/clothes/8eeff5fe-9494-4b84-8095-a287be31cc67.jpg?w=800&f=webp&q=100", "sale_price": 69000, "link": "https://danble.co.kr/product/39788", "offers": [{"source": "댄블", "sale_price": 69000, "discount": 47, "link": "https://danble.co.kr/product/39788"}], "best_price": 69000, "max_discount": 47, "num_sources": 1, "original_price": 130189, "overall_rank": 21}, {"category": "아우터", "brand": "ZIOZIA", "name": "미라쿨 반팔 카라 가디건", "price": 37000, "discount": 71, "source": "댄블", "image": "https://ds1l559sry31l.cloudfront.net/media/clothes/ece5a966-06dd-4325-81cf-eab47a3c04d0.jpg?w=800&f=webp&q=100", "sale_price": 37000, "link": "https://danble.co.kr/product/221909", "offers": [{"source": "댄블", "sale_price": 37000, "discount": 71, "link": "https://danble.co.kr/product/221909"}], "best_price": 37000, "max_discount": 71, "num_sources": 1, "original_price": 127586, "overall_rank": 6}, {"category": "하의", "brand": "모즈모즈", "name": "컴포트 썸머 와이드 팬츠 블랙", "price": 19200, "discount": 40, "source": "무신사", "image": "https://image.msscdn.net/thumbnails/images/goods_img/20260318/6152463/6152463_17822622701511_500.jpg?w=780", "sale_price": 19200, "link": "https://www.musinsa.com/products/6152463", "offers": [{"source": "무신사", "sale_price": 19200, "discount": 40, "link": "https://www.musinsa.com/products/6152463"}], "best_price": 19200, "max_discount": 40, "num_sources": 1, "original_price": 32000, "overall_rank": 25}, {"category": "하의", "brand": "디미트리블랙", "name": "COOLMAX 원턱 스웻 하프 팬츠 3color", "price": 19900, "discount": 52, "source": "무신사", "image": "https://image.msscdn.net/thumbnails/images/goods_img/20260408/6278961/6278961_17788291612493_500.png?w=780", "sale_price": 19900, "link": "https://www.musinsa.com/products/6278961", "offers": [{"source": "무신사", "sale_price": 19900, "discount": 52, "link": "https://www.musinsa.com/products/6278961"}], "best_price": 19900, "max_discount": 52, "num_sources": 1, "original_price": 41458, "overall_rank": 17}, {"category": "하의", "brand": "무신사 스탠다드", "name": "커브드 데님 팬츠 (8colors)", "price": 44890, "discount": 10, "source": "무신사", "image": "https://image.msscdn.net/thumbnails/images/goods_img/20260304/6078643/6078643_17836638554659_500.jpg?w=780", "sale_price": 44890, "link": "https://www.musinsa.com/products/6078643", "offers": [{"source": "무신사", "sale_price": 44890, "discount": 10, "link": "https://www.musinsa.com/products/6078643"}], "best_price": 44890, "max_discount": 10, "num_sources": 1, "original_price": 49878, "overall_rank": 42}, {"category": "하의", "brand": "리베아르", "name": "초경량 타슬란 우븐 쇼츠 배기스 반바지", "price": 38800, "discount": 36, "source": "W컨셉", "image": "https://product-image.wconcept.co.kr/productimg/image/img9/96/307149296_CK52598.jpg?RS=374", "sale_price": 38800, "link": "https://www.wconcept.co.kr/Product/307149296", "offers": [{"source": "W컨셉", "sale_price": 38800, "discount": 36, "link": "https://www.wconcept.co.kr/Product/307149296"}], "best_price": 38800, "max_discount": 36, "num_sources": 1, "original_price": 60625, "overall_rank": 27}, {"category": "하의", "brand": "이즈(ease)", "name": "LINEN BANDING PANTS [WIDE FIT] 3color", "price": 46784, "discount": 31, "source": "W컨셉", "image": "https://product-image.wconcept.co.kr/productimg/image/img9/62/302685762_BB30949.jpg?RS=374", "sale_price": 46784, "link": "https://www.wconcept.co.kr/Product/302685762", "offers": [{"source": "W컨셉", "sale_price": 46784, "discount": 31, "link": "https://www.wconcept.co.kr/Product/302685762"}], "best_price": 46784, "max_discount": 31, "num_sources": 1, "original_price": 67803, "overall_rank": 32}, {"category": "하의", "brand": "MYCOB", "name": "포시즌 테이퍼드핏 워셔블 밴딩 슬랙스 ver.2 (베이지)", "price": 29900, "discount": 62, "source": "댄블", "image": "https://ds1l559sry31l.cloudfront.net/media/clothes/49982fb8-18a3-48a6-b91b-1e69da8c9973.png?w=600&f=webp&q=85", "sale_price": 29900, "link": "https://danble.co.kr/product/26186", "offers": [{"source": "댄블", "sale_price": 29900, "discount": 62, "link": "https://danble.co.kr/product/26186"}], "best_price": 29900, "max_discount": 62, "num_sources": 1, "original_price": 78684, "overall_rank": 11}, {"category": "하의", "brand": "HOOANGS", "name": "쿨 썸머 데님 밴딩 여름 청바지 팬츠", "price": 24800, "discount": 71, "source": "댄블", "image": "https://ds1l559sry31l.cloudfront.net/media/clothes/05191098-32bd-4435-b7db-e674bc06cbe8.jpg?w=800&f=webp&q=100", "sale_price": 24800, "link": "https://danble.co.kr/product/123336", "offers": [{"source": "댄블", "sale_price": 24800, "discount": 71, "link": "https://danble.co.kr/product/123336"}], "best_price": 24800, "max_discount": 71, "num_sources": 1, "original_price": 85517, "overall_rank": 7}, {"category": "하의", "brand": "BELIVUS", "name": "원턱 와이드 치노팬츠 빅사이즈 반바지", "price": 29800, "discount": 33, "source": "댄블", "image": "https://ds1l559sry31l.cloudfront.net/media/clothes/32373e6e-aa77-4bda-8066-927513368c67.jpg?w=800&f=webp&q=100", "sale_price": 29800, "link": "https://danble.co.kr/product/66460", "offers": [{"source": "댄블", "sale_price": 29800, "discount": 33, "link": "https://danble.co.kr/product/66460"}], "best_price": 29800, "max_discount": 33, "num_sources": 1, "original_price": 44478, "overall_rank": 31}, {"category": "하의", "brand": "NIKE", "name": "드라이 핏 파크 3 니트 쇼츠 반바지", "price": 19500, "discount": 22, "source": "댄블", "image": "https://ds1l559sry31l.cloudfront.net/media/clothes/865e21c4-3760-445a-8fe6-13bbdf86552e.jpg?w=800&f=webp&q=100", "sale_price": 19500, "link": "https://danble.co.kr/product/148332", "offers": [{"source": "댄블", "sale_price": 19500, "discount": 22, "link": "https://danble.co.kr/product/148332"}], "best_price": 19500, "max_discount": 22, "num_sources": 1, "original_price": 25000, "overall_rank": 37}, {"category": "하의", "brand": "클라쓰업", "name": "워드 남자 아이스 쿨링 투핀턱 스판 와이드 슬랙스", "price": 23715, "discount": 66, "source": "하이버", "image": "https://image.brandi.co.kr/cproduct/2025/05/16/SB000000000173729615_1747407564617_image1_S.jpg", "sale_price": 23715, "link": "https://www.hiver.co.kr/products/178472769", "offers": [{"source": "하이버", "sale_price": 23715, "discount": 66, "link": "https://www.hiver.co.kr/products/178472769"}], "best_price": 23715, "max_discount": 66, "num_sources": 1, "original_price": 69750, "overall_rank": 8}, {"category": "신발", "brand": "나이키", "name": "페가수스 42 M (서밋 화이트 등)", "price": 121680, "discount": 28, "source": "무신사", "image": "https://image.msscdn.net/thumbnails/images/goods_img/20260402/6245026/6245026_17788064770202_500.jpg?w=780", "sale_price": 121680, "link": "https://www.musinsa.com/products/6245026", "offers": [{"source": "무신사", "sale_price": 121680, "discount": 28, "link": "https://www.musinsa.com/products/6245026"}], "best_price": 121680, "max_discount": 28, "num_sources": 1, "original_price": 169000, "overall_rank": 35}, {"category": "신발", "brand": "크록스", "name": "에코 시티 어드벤쳐 클로그 엘리펀트", "price": 119000, "discount": 0, "source": "무신사", "image": "https://image.msscdn.net/thumbnails/images/goods_img/20260504/6415726/6415726_17788140162641_500.jpg?w=780", "sale_price": 119000, "link": "https://www.musinsa.com/products/6415726", "offers": [{"source": "무신사", "sale_price": 119000, "discount": 0, "link": "https://www.musinsa.com/products/6415726"}], "best_price": 119000, "max_discount": 0, "num_sources": 1, "original_price": 119000, "overall_rank": 44}, {"category": "신발", "brand": "반스", "name": "스케이트 하프 캡 블랙:화이트", "price": 69300, "discount": 30, "source": "무신사", "image": "https://image.msscdn.net/thumbnails/images/goods_img/20260406/6260909/6260909_17758017000387_500.jpg?w=780", "sale_price": 69300, "link": "https://www.musinsa.com/products/6260909", "offers": [{"source": "무신사", "sale_price": 69300, "discount": 30, "link": "https://www.musinsa.com/products/6260909"}], "best_price": 69300, "max_discount": 30, "num_sources": 1, "original_price": 99000, "overall_rank": 33}, {"category": "신발", "brand": "크록스", "name": "에코 웨이브 엘리펀트", "price": 44990, "discount": 55, "source": "무신사", "image": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6021836/6021836_17732823157261_500.jpg?w=780", "sale_price": 44990, "link": "https://www.musinsa.com/products/6021836", "offers": [{"source": "무신사", "sale_price": 44990, "discount": 55, "link": "https://www.musinsa.com/products/6021836"}], "best_price": 44990, "max_discount": 55, "num_sources": 1, "original_price": 99978, "overall_rank": 15}, {"category": "신발", "brand": "버켄스탁", "name": "토키오 2 스웨이드 샌들", "price": 228000, "discount": 36, "source": "W컨셉", "image": "https://product-image.wconcept.co.kr/productimg/image/img9/70/308620570_GH86866.jpg?RS=374", "sale_price": 228000, "link": "https://www.wconcept.co.kr/Product/308620570", "offers": [{"source": "W컨셉", "sale_price": 228000, "discount": 36, "link": "https://www.wconcept.co.kr/Product/308620570"}], "best_price": 228000, "max_discount": 36, "num_sources": 1, "original_price": 356250, "overall_rank": 28}, {"category": "신발", "brand": "아워레가시(아디다스)", "name": "삼바 LX 프라이자잇 커피화이트 KI4762", "price": 251900, "discount": 15, "source": "W컨셉", "image": "https://product-image.wconcept.co.kr/productimg/image/img9/95/308722995_QY65000.jpg?RS=374", "sale_price": 251900, "link": "https://www.wconcept.co.kr/Product/308722995", "offers": [{"source": "W컨셉", "sale_price": 251900, "discount": 15, "link": "https://www.wconcept.co.kr/Product/308722995"}], "best_price": 251900, "max_discount": 15, "num_sources": 1, "original_price": 296353, "overall_rank": 40}, {"category": "신발", "brand": "파라부트", "name": "1908 18 바스 MARRON 보트 로퍼", "price": 399000, "discount": 13, "source": "W컨셉", "image": "https://product-image.wconcept.co.kr/productimg/image/img1/25/308705125_GG19045.jpg?RS=374", "sale_price": 399000, "link": "https://www.wconcept.co.kr/Product/308705125", "offers": [{"source": "W컨셉", "sale_price": 399000, "discount": 13, "link": "https://www.wconcept.co.kr/Product/308705125"}], "best_price": 399000, "max_discount": 13, "num_sources": 1, "original_price": 458621, "overall_rank": 41}, {"category": "신발", "brand": "살로몬", "name": "XT-6 시리즈 트레일 러닝화", "price": 99000, "discount": 64, "source": "하이버", "image": "https://image.brandi.co.kr/cproduct/2026/07/28/SB000000000178959414_1785249617039_image1_S.png", "sale_price": 99000, "link": "https://www.hiver.co.kr/products/183595831", "offers": [{"source": "하이버", "sale_price": 99000, "discount": 64, "link": "https://www.hiver.co.kr/products/183595831"}], "best_price": 99000, "max_discount": 64, "num_sources": 1, "original_price": 275000, "overall_rank": 9}, {"category": "신발", "brand": "나이키", "name": "슈프림 에어포스", "price": 89000, "discount": 72, "source": "하이버", "image": "https://image.brandi.co.kr/cproduct/2026/07/31/SB000000000178987301_1785508521131_image1_S.png", "sale_price": 89000, "link": "https://www.hiver.co.kr/products/183623611", "offers": [{"source": "하이버", "sale_price": 89000, "discount": 72, "link": "https://www.hiver.co.kr/products/183623611"}], "best_price": 89000, "max_discount": 72, "num_sources": 1, "original_price": 317857, "overall_rank": 4}, {"category": "신발", "brand": "뉴발란스", "name": "1906 남여공용 운동화", "price": 82175, "discount": 56, "source": "하이버", "image": "https://image.brandi.co.kr/cproduct/2026/06/26/SB000000000178480442_1782486166319_image1_S.jpg", "sale_price": 82175, "link": "https://www.hiver.co.kr/products/183055197", "offers": [{"source": "하이버", "sale_price": 82175, "discount": 56, "link": "https://www.hiver.co.kr/products/183055197"}], "best_price": 82175, "max_discount": 56, "num_sources": 1, "original_price": 186761, "overall_rank": 13}, {"category": "신발", "brand": "CUSTOMADE", "name": "3cm 소가죽 스웨이드 로퍼 루이스", "price": 80600, "discount": 35, "source": "댄블", "image": "https://ds1l559sry31l.cloudfront.net/media/clothes/7e0f3d4f-9109-41a7-be67-7406cfa662d4.jpg?w=800&f=webp&q=100", "sale_price": 80600, "link": "https://danble.co.kr/product/50009", "offers": [{"source": "댄블", "sale_price": 80600, "discount": 35, "link": "https://danble.co.kr/product/50009"}], "best_price": 80600, "max_discount": 35, "num_sources": 1, "original_price": 124000, "overall_rank": 30}, {"category": "신발", "brand": "NIKE", "name": "국내매장판 보메로 18 서밋 화이트", "price": 149800, "discount": 50, "source": "댄블", "image": "https://ds1l559sry31l.cloudfront.net/media/clothes/1008d9ac-225d-4646-94b2-d79934f6c56c.jpg?w=800&f=webp&q=100", "sale_price": 149800, "link": "https://danble.co.kr/product/128003", "offers": [{"source": "댄블", "sale_price": 149800, "discount": 50, "link": "https://danble.co.kr/product/128003"}], "best_price": 149800, "max_discount": 50, "num_sources": 1, "original_price": 299600, "overall_rank": 19}];
-
-const CATEGORIES = ["전체", "상의", "아우터", "하의", "신발"];
-const SOURCES = ["전체", "무신사", "W컨셉", "하이버", "댄블"];
-const MAIN_TABS = [
-  {id: "browse", label: "쇼핑몰별 보기"},
-  {id: "ranking", label: "종합 랭킹"},
+// ============ DATA ============
+const LOOKS = [
+{"image": "https://images.onthelook.co.kr/posts/202606150606943518296370.jpeg?w=600&q=60&f=webp", "styleTag": "미니멀"},
+{"image": "https://images.onthelook.co.kr/posts/202606150506996418296370.jpeg?w=600&q=60&f=webp", "styleTag": "미니멀"},
+{"image": "https://images.onthelook.co.kr/posts/202606230906232318296370.jpeg?w=600&q=60&f=webp", "styleTag": "미니멀"},
+{"image": "https://images.onthelook.co.kr/posts/202607070707224518296370.jpeg?w=600&q=60&f=webp", "styleTag": "미니멀"},
+{"image": "https://images.onthelook.co.kr/posts/202606101206632518745450.jpeg?w=600&q=60&f=webp", "styleTag": "미니멀"},
+{"image": "https://images.onthelook.co.kr/posts/2026060908063310369010.jpeg?w=600&q=60&f=webp", "styleTag": "미니멀"},
+{"image": "https://images.onthelook.co.kr/posts/202607180907651220720.jpeg?w=600&q=60&f=webp", "styleTag": "미니멀"},
+{"image": "https://images.onthelook.co.kr/posts/2026061708066163369010.jpeg?w=600&q=60&f=webp", "styleTag": "미니멀"},
+{"image": "https://images.onthelook.co.kr/posts/202607220907162718296370.jpeg?w=600&q=60&f=webp", "styleTag": "이지캐주얼"},
+{"image": "https://images.onthelook.co.kr/posts/202607090507290218296370.jpeg?w=600&q=60&f=webp", "styleTag": "이지캐주얼"},
+{"image": "https://images.onthelook.co.kr/posts/202607270607396018296370.jpeg?w=600&q=60&f=webp", "styleTag": "이지캐주얼"},
+{"image": "https://images.onthelook.co.kr/posts/2026072510074916800420.jpeg?w=600&q=60&f=webp", "styleTag": "이지캐주얼"},
+{"image": "https://images.onthelook.co.kr/posts/202607300707820918296370.jpeg?w=600&q=60&f=webp", "styleTag": "이지캐주얼"},
+{"image": "https://images.onthelook.co.kr/posts/202608050808629918296370.jpeg?w=600&q=60&f=webp", "styleTag": "이지캐주얼"},
+{"image": "https://images.onthelook.co.kr/posts/2026063008063292781730.jpeg?w=600&q=60&f=webp", "styleTag": "이지캐주얼"},
+{"image": "https://images.onthelook.co.kr/posts/202608010408512918296370.jpeg?w=600&q=60&f=webp", "styleTag": "이지캐주얼"},
+{"image": "https://images.onthelook.co.kr/posts/202605161205998715698680.jpeg?w=600&q=60&f=webp", "styleTag": "스트릿"},
+{"image": "https://images.onthelook.co.kr/posts/2026052000056143800420.jpeg?w=600&q=60&f=webp", "styleTag": "스트릿"},
+{"image": "https://images.onthelook.co.kr/posts/2026051804051430800420.jpeg?w=600&q=60&f=webp", "styleTag": "스트릿"},
+{"image": "https://images.onthelook.co.kr/posts/2026053001051016800420.jpeg?w=600&q=60&f=webp", "styleTag": "스트릿"},
+{"image": "https://images.onthelook.co.kr/posts/2026070511071611800420.jpeg?w=600&q=60&f=webp", "styleTag": "스트릿"},
+{"image": "https://images.onthelook.co.kr/posts/202607170607447920720.jpeg?w=600&q=60&f=webp", "styleTag": "스트릿"},
+{"image": "https://images.onthelook.co.kr/posts/2026071700079301879660.jpeg?w=600&q=60&f=webp", "styleTag": "스트릿"},
+{"image": "https://images.onthelook.co.kr/posts/202605241105579118296370.jpeg?w=600&q=60&f=webp", "styleTag": "스트릿"},
+{"image": "https://images.onthelook.co.kr/posts/202607130807691918745450.jpeg?w=600&q=60&f=webp", "styleTag": "시티보이"},
+{"image": "https://images.onthelook.co.kr/posts/202605150605363218745450.jpeg?w=600&q=60&f=webp", "styleTag": "시티보이"},
+{"image": "https://images.onthelook.co.kr/posts/202607201007914618745450.jpeg?w=600&q=60&f=webp", "styleTag": "시티보이"},
+{"image": "https://images.onthelook.co.kr/posts/202605190605470818745454.jpeg?w=600&q=60&f=webp", "styleTag": "시티보이"},
+{"image": "https://images.onthelook.co.kr/posts/202606221006843318745450.jpeg?w=600&q=60&f=webp", "styleTag": "시티보이"},
+{"image": "https://images.onthelook.co.kr/posts/202606261006436418745451.jpeg?w=600&q=60&f=webp", "styleTag": "시티보이"},
+{"image": "https://images.onthelook.co.kr/posts/202606181006809718745450.jpeg?w=600&q=60&f=webp", "styleTag": "시티보이"},
+{"image": "https://images.onthelook.co.kr/posts/2026061900067539879660.jpeg?w=600&q=60&f=webp", "styleTag": "시티보이"},
+{"image": "https://images.onthelook.co.kr/posts/202512091512352910021830.jpeg?w=600&q=60&f=webp", "styleTag": "아메카지"},
+{"image": "https://images.onthelook.co.kr/posts/202605082205835017826120.jpg?w=600&q=60&f=webp", "styleTag": "아메카지"},
+{"image": "https://images.onthelook.co.kr/posts/202512102112716911803770.jpeg?w=600&q=60&f=webp", "styleTag": "아메카지"},
+{"image": "https://images.onthelook.co.kr/posts/202512090212880083740.jpeg?w=600&q=60&f=webp", "styleTag": "아메카지"},
+{"image": "https://images.onthelook.co.kr/posts/202601262301825819531870.jpeg?w=600&q=60&f=webp", "styleTag": "아메카지"},
+{"image": "https://images.onthelook.co.kr/posts/202601261901861219531871.jpeg?w=600&q=60&f=webp", "styleTag": "아메카지"},
+{"image": "https://images.onthelook.co.kr/posts/202602181202142819531870.jpeg?w=600&q=60&f=webp", "styleTag": "아메카지"},
+{"image": "https://images.onthelook.co.kr/posts/202601261901787219531870.jpeg?w=600&q=60&f=webp", "styleTag": "아메카지"},
+{"image": "https://images.onthelook.co.kr/posts/20260516130578809164960.jpeg?w=600&q=60&f=webp", "styleTag": "스포티"},
+{"image": "https://images.onthelook.co.kr/posts/202607310707209618296370.jpeg?w=600&q=60&f=webp", "styleTag": "스포티"},
+{"image": "https://images.onthelook.co.kr/posts/202605140705127718296370.jpeg?w=600&q=60&f=webp", "styleTag": "스포티"},
+{"image": "https://images.onthelook.co.kr/posts/202604280804773618296370.jpeg?w=600&q=60&f=webp", "styleTag": "스포티"},
+{"image": "https://images.onthelook.co.kr/posts/202607291107666018745450.jpeg?w=600&q=60&f=webp", "styleTag": "스포티"},
+{"image": "https://images.onthelook.co.kr/posts/202604100704399718296372.jpeg?w=600&q=60&f=webp", "styleTag": "스포티"},
+{"image": "https://images.onthelook.co.kr/posts/202604190804948118296370.jpeg?w=600&q=60&f=webp", "styleTag": "스포티"},
+{"image": "https://images.onthelook.co.kr/posts/202605200105305616437520.jpeg?w=600&q=60&f=webp", "styleTag": "스포티"},
+{"image": "https://images.onthelook.co.kr/posts/2025073110079155369010.jpeg?w=600&q=60&f=webp", "styleTag": "모던캐주얼"},
+{"image": "https://images.onthelook.co.kr/posts/202510250810783911803771.jpeg?w=600&q=60&f=webp", "styleTag": "모던캐주얼"},
+{"image": "https://images.onthelook.co.kr/posts/2026022700026083879660.jpeg?w=600&q=60&f=webp", "styleTag": "모던캐주얼"},
+{"image": "https://images.onthelook.co.kr/posts/2026031910037333369010.jpeg?w=600&q=60&f=webp", "styleTag": "모던캐주얼"},
+{"image": "https://images.onthelook.co.kr/posts/20251016021045221188510.jpeg?w=600&q=60&f=webp", "styleTag": "모던캐주얼"},
+{"image": "https://images.onthelook.co.kr/posts/2025071619072491307994.jpeg?w=600&q=60&f=webp", "styleTag": "모던캐주얼"},
+{"image": "https://images.onthelook.co.kr/posts/2025071620076045307990.jpeg?w=600&q=60&f=webp", "styleTag": "모던캐주얼"},
+{"image": "https://images.onthelook.co.kr/posts/2025072904071499307990.jpeg?w=600&q=60&f=webp", "styleTag": "모던캐주얼"},
+{"image": "https://images.onthelook.co.kr/posts/20250224090230261203050.jpg?w=600&q=60&f=webp", "styleTag": "유니크"},
+{"image": "https://images.onthelook.co.kr/posts/20250221060235551612530.jpeg?w=600&q=60&f=webp", "styleTag": "유니크"},
+{"image": "https://images.onthelook.co.kr/posts/202507141107144812776000.jpeg?w=600&q=60&f=webp", "styleTag": "유니크"},
+{"image": "https://images.onthelook.co.kr/posts/2025030310031186917250.jpeg?w=600&q=60&f=webp", "styleTag": "유니크"},
+{"image": "https://images.onthelook.co.kr/posts/202503160303830818770380.jpeg?w=600&q=60&f=webp", "styleTag": "유니크"},
+{"image": "https://images.onthelook.co.kr/posts/2025030615032271933130.jpeg?w=600&q=60&f=webp", "styleTag": "유니크"},
+{"image": "https://images.onthelook.co.kr/posts/2025031010035095933130.jpeg?w=600&q=60&f=webp", "styleTag": "유니크"},
+{"image": "https://images.onthelook.co.kr/posts/202503180303749110105660.jpeg?w=600&q=60&f=webp", "styleTag": "유니크"}
 ];
 
-let state = { mainTab: "browse", category: "전체", source: "전체", sort: "discount_desc", query: "" };
+const STYLE_PRODUCTS = [
+{"styleTag":"미니멀","category":"아우터","brand":"마인드브릿지","name":"[오정규 PICK] 두굿_[COUTURE]캐시미어 오버핏 발마칸 롱 코트 - 4color","price":167440,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20250918/5489923/5489923_17669744892634_big.jpg?w=780","link":"https://www.musinsa.com/products/5489923"},
+{"styleTag":"미니멀","category":"하의","brand":"르아르","name":"커브드 코튼 치노 팬츠 [차콜]","price":24500,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20250130/4747236/4747236_17764010602340_big.jpg?w=780","link":"https://www.musinsa.com/products/4747236"},
+{"styleTag":"미니멀","category":"기타","brand":"미나브","name":"미니멀 리얼 레더 벨트 [브라운]","price":27300,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20240129/3830417/3830417_17194485746743_big.jpg?w=780","link":"https://www.musinsa.com/products/3830417"},
+{"styleTag":"미니멀","category":"상의","brand":"르아르","name":"링클 시어서커 체크 반팔 셔츠 [차콜]","price":26900,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20250404/4989733/4989733_17477885499560_big.jpg?w=780","link":"https://www.musinsa.com/products/4989733"},
+{"styleTag":"미니멀","category":"상의","brand":"마인드브릿지","name":"[에어쿨]린넨 라이크 세미 오버핏 셔츠 -5color","price":29900,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20240306/3926599/3926599_17852067292079_big.jpg?w=780","link":"https://www.musinsa.com/products/3926599"},
+{"styleTag":"미니멀","category":"상의","brand":"로템버","name":"린넨 오픈카라 펜슬 스트라이프 셔츠 [OATMEAL]","price":54720,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20250110/4711502/4711502_17727743475911_big.jpg?w=780","link":"https://www.musinsa.com/products/4711502"},
+{"styleTag":"미니멀","category":"신발","brand":"킨치","name":"OVATE - 500 (a) / BLACK","price":221090,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20230918/3568935/3568935_16995104812799_big.jpg?w=780","link":"https://www.musinsa.com/products/3568935"},
+{"styleTag":"이지캐주얼","category":"하의","brand":"유니온블루","name":"CHAMBRAY EASY PANTS [BLUE]","price":115200,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20260714/6837218/6837218_17854823459137_big.png?w=780","link":"https://www.musinsa.com/products/6837218"},
+{"styleTag":"이지캐주얼","category":"하의","brand":"엑스컨테이너","name":"나일론 이지 턱 와이드 팬츠 (BLACK)","price":38430,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20260204/5980521/5980521_17821891891704_big.jpg?w=780","link":"https://www.musinsa.com/products/5980521"},
+{"styleTag":"이지캐주얼","category":"하의","brand":"웬즈데이오아시스","name":"이지 린넨 세미 와이드 밴딩 팬츠(7color)","price":35100,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20240207/3854033/3854033_17170302798190_big.jpg?w=780","link":"https://www.musinsa.com/products/3854033"},
+{"styleTag":"이지캐주얼","category":"하의","brand":"후브스","name":"[패션플래닛X후브스] 커브드 워싱 이지 팬츠 - 4Color","price":56800,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20260428/6391286/6391286_17790884650203_big.jpg?w=780","link":"https://www.musinsa.com/products/6391286"},
+{"styleTag":"이지캐주얼","category":"상의","brand":"러기드하우스","name":"이지 스냅 원포켓 와플 헨리넥 반팔티 블랙","price":44000,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20260611/6654214/6654214_17811627168940_big.jpg?w=780","link":"https://www.musinsa.com/products/6654214"},
+{"styleTag":"이지캐주얼","category":"상의","brand":"바이모노","name":"[빅사이즈 M-6XL] 꼭꼭숨티 쁘띠쁘띠 백프린팅 반팔티","price":32220,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20260512/6460286/6460286_17859860736574_big.jpg?w=780","link":"https://www.musinsa.com/products/6460286"},
+{"styleTag":"스트릿","category":"상의","brand":"노티카","name":"아치 프레임 로고 티셔츠(3colors) NTS6026","price":23200,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20260716/6858118/6858118_17852024206996_big.jpg?w=780","link":"https://www.musinsa.com/products/6858118"},
+{"styleTag":"스트릿","category":"상의","brand":"그리쉬","name":"롤업 레이어드 크롭 반팔티 [블랙]","price":27930,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20260722/6896783/6896783_17853840155941_big.jpg?w=780","link":"https://www.musinsa.com/products/6896783"},
+{"styleTag":"스트릿","category":"하의","brand":"플랙","name":"깡스타일리스트 X 플랙 와이드 배기 데님 팬츠 K93 블랙","price":31800,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20250429/5074988/5074988_17458885271422_big.jpg?w=780","link":"https://www.musinsa.com/products/5074988"},
+{"styleTag":"스트릿","category":"상의","brand":"에이프","name":"AAPE X BABY MILO STORE Short Sleeve tee / AAPTEM9861XXQWHX","price":129000,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20260715/6853538/6853538_17841066177427_big.jpg?w=780","link":"https://www.musinsa.com/products/6853538"},
+{"styleTag":"스트릿","category":"하의","brand":"르아르","name":"커브드 코튼 치노 팬츠 [차콜]","price":24500,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20250130/4747236/4747236_17764010602340_big.jpg?w=780","link":"https://www.musinsa.com/products/4747236"},
+{"styleTag":"스트릿","category":"상의","brand":"노티카","name":"오션 토템 티셔츠(4colors) NTS5546","price":27300,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20260316/6139656/6139656_17860796018851_big.jpg?w=780","link":"https://www.musinsa.com/products/6139656"},
+{"styleTag":"스트릿","category":"상의","brand":"소버먼트","name":"460G 피그먼트 링거 티셔츠-차콜-","price":35000,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20250512/5105019/5105019_17470771234149_big.jpg?w=780","link":"https://www.musinsa.com/products/5105019"},
+{"styleTag":"스트릿","category":"상의","brand":"노티카","name":"세일링 블록 슬리브리스(3colors) NTS5816","price":35100,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20260402/6245405/6245405_17756341177671_big.jpg?w=780","link":"https://www.musinsa.com/products/6245405"},
+{"styleTag":"시티보이","category":"하의","brand":"르아르","name":"커브드 코튼 치노 팬츠 [차콜]","price":24500,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20250130/4747236/4747236_17764010602340_big.jpg?w=780","link":"https://www.musinsa.com/products/4747236"},
+{"styleTag":"시티보이","category":"상의","brand":"마인드브릿지","name":"[ON]스트라이프 오버핏 셔츠 - 3color","price":49260,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20250804/5289769/5289769_17726775493842_big.jpg?w=780","link":"https://www.musinsa.com/products/5289769"},
+{"styleTag":"시티보이","category":"상의","brand":"마인드브릿지","name":"[ON]스트라이프 오버핏 크림 반팔 셔츠","price":39900,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20250314/4898914/4898914_17750367804631_big.jpg?w=780","link":"https://www.musinsa.com/products/4898914"},
+{"styleTag":"시티보이","category":"상의","brand":"유니온블루","name":"[STALKERS × UNIONBLUE] BRIGHTON STRIPE SHIRT","price":77900,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20240220/3884715/3884715_17150586624454_big.jpg?w=780","link":"https://www.musinsa.com/products/3884715"},
+{"styleTag":"시티보이","category":"하의","brand":"무신사 스탠다드","name":"코튼 딥 턱 와이드 밴딩 팬츠 [베이지]","price":32290,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20231215/3758185/3758185_17067714979436_big.jpg?w=780","link":"https://www.musinsa.com/products/3758185"},
+{"styleTag":"시티보이","category":"상의","brand":"마인드브릿지","name":"[에어쿨]코튼 세미 오버핏 셔츠- 6color","price":24900,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20250314/4898898/4898898_17501285551927_big.jpg?w=780","link":"https://www.musinsa.com/products/4898898"},
+{"styleTag":"시티보이","category":"상의","brand":"무신사 스탠다드","name":"오버사이즈 옥스포드 반소매 셔츠 [스카이 블루]","price":25990,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20220118/2312248/2312248_16898421362796_big.jpg?w=780","link":"https://www.musinsa.com/products/2312248"},
+{"styleTag":"시티보이","category":"상의","brand":"언탭트 스튜디오","name":"시티보이 오버핏 피그먼트 반팔 셔츠 7COLOR","price":32220,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20260327/6213122/6213122_17745986695364_big.jpg?w=780","link":"https://www.musinsa.com/products/6213122"},
+{"styleTag":"아메카지","category":"하의","brand":"아이돈워너셀","name":"Soft Suede Twill Balloon Pants","price":74970,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20241113/4613450/4613450_17322612728135_big.jpg?w=780","link":"https://www.musinsa.com/products/4613450"},
+{"styleTag":"아메카지","category":"상의","brand":"빈웨드","name":"NEVADA Off-Road 아이보리 세미오버핏 티셔츠","price":37810,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20240530/4168774/4168774_17526509988492_big.jpg?w=780","link":"https://www.musinsa.com/products/4168774"},
+{"styleTag":"아메카지","category":"상의","brand":"유니폼브릿지","name":"washington s/s tee charcoal","price":23400,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20230406/3212387/3212387_16819802234429_big.jpg?w=780","link":"https://www.musinsa.com/products/3212387"},
+{"styleTag":"아메카지","category":"상의","brand":"빈웨드","name":"Fighter Jet Academy 파이터 제트 아카데미 아이보리/카키 세미오버핏 링거 티셔츠","price":39710,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20260429/6404230/6404230_17774675409078_big.jpg?w=780","link":"https://www.musinsa.com/products/6404230"},
+{"styleTag":"아메카지","category":"상의","brand":"유니폼브릿지","name":"boy scout s/s tee oatmeal","price":23400,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20240407/4033257/4033257_17125716656711_big.jpg?w=780","link":"https://www.musinsa.com/products/4033257"},
+{"styleTag":"아메카지","category":"하의","brand":"유니폼브릿지","name":"m65 pants navy","price":47710,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20250221/4817733/4817733_17417141631058_big.jpg?w=780","link":"https://www.musinsa.com/products/4817733"},
+{"styleTag":"아메카지","category":"하의","brand":"앵글런","name":"Essential Easy Balloon Pants - Khaki","price":77400,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20230403/3202801/3202801_17654298533751_big.jpg?w=780","link":"https://www.musinsa.com/products/3202801"},
+{"styleTag":"아메카지","category":"상의","brand":"헤이스트","name":"워시드 와플 니트 헨리 티 빈티지 블랙","price":95000,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20240905/4407567/4407567_17836495175391_big.jpg?w=780","link":"https://www.musinsa.com/products/4407567"},
+{"styleTag":"스포티","category":"하의","brand":"아디다스","name":"3S 숏 팬츠 - 블랙 / IU2337","price":36990,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20240611/4190150/4190150_17182425900848_big.jpg?w=780","link":"https://www.musinsa.com/products/4190150"},
+{"styleTag":"스포티","category":"하의","brand":"제멋","name":"[2PACK] 코스모 밴딩 숏팬츠 2PACK JMSP2332","price":37900,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20210407/1884480/1884480_16735745148445_big.jpg?w=780","link":"https://www.musinsa.com/products/1884480"},
+{"styleTag":"스포티","category":"하의","brand":"커스텀어클락","name":"와이드 원턱 스웻팬츠 8 COLOR COOSPT207","price":17450,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20230208/3069977/3069977_17847851632129_big.jpg?w=780","link":"https://www.musinsa.com/products/3069977"},
+{"styleTag":"스포티","category":"신발","brand":"발렌시아가","name":"스피드 2.0 풀 클리어 솔 그래피티 리사이클드 니트 스니커즈 - 블랙:블루 / 617239W2DC41040","price":399990,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20250210/4770389/4770389_17397600806156_big.jpg?w=780","link":"https://www.musinsa.com/products/4770389"},
+{"styleTag":"스포티","category":"하의","brand":"엑스컨테이너","name":"사이드 라인 나일론 트랙 팬츠 (BLACK)","price":37950,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20250107/4702364/4702364_17754493518261_big.jpg?w=780","link":"https://www.musinsa.com/products/4702364"},
+{"styleTag":"스포티","category":"신발","brand":"리복","name":"프리미어 로드 프라임 - 크림:블랙 / 100208662","price":49500,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20240905/4407587/4407587_17260442049246_big.jpg?w=780","link":"https://www.musinsa.com/products/4407587"},
+{"styleTag":"스포티","category":"하의","brand":"토피","name":"파이핑 라인 트랙 스트링 팬츠 (BLACK)","price":44900,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20230801/3439140/3439140_17821119476674_big.png?w=780","link":"https://www.musinsa.com/products/3439140"},
+{"styleTag":"스포티","category":"하의","brand":"엘리메노","name":"EL 베이직 절개 테이핑 트랙 팬츠 2Color","price":38900,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20250901/5386361/5386361_17757874049728_big.jpg?w=780","link":"https://www.musinsa.com/products/5386361"},
+{"styleTag":"모던캐주얼","category":"기타","brand":"드로우핏","name":"[서강준PICK] 슬림 모던 타이 [4COLORS]","price":22500,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20240201/3840002/3840002_17697573522893_big.jpg?w=780","link":"https://www.musinsa.com/products/3840002"},
+{"styleTag":"모던캐주얼","category":"신발","brand":"레더리","name":"[레더리X오정규] 토루프 모던 샌들 슬라이드","price":47360,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20230519/3312606/3312606_17162712411001_big.jpg?w=780","link":"https://www.musinsa.com/products/3312606"},
+{"styleTag":"모던캐주얼","category":"신발","brand":"락포트","name":"모던 프렙 페니 MODERN PREP PENNY / BLACK(RM0072)","price":186300,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20240320/3972398/3972398_17449427526651_big.jpg?w=780","link":"https://www.musinsa.com/products/3972398"},
+{"styleTag":"모던캐주얼","category":"하의","brand":"모덴아르더","name":"더블 패널 와이드 데님 팬츠 (연청)","price":21600,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20250116/4725523/4725523_17391668523951_big.jpg?w=780","link":"https://www.musinsa.com/products/4725523"},
+{"styleTag":"모던캐주얼","category":"하의","brand":"모덴아르더","name":"이지 루즈 데님 팬츠 (진청)","price":68040,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20230530/3333711/3333711_17086535156071_big.jpg?w=780","link":"https://www.musinsa.com/products/3333711"},
+{"styleTag":"모던캐주얼","category":"기타","brand":"타티아나","name":"[무신사 단독]BT8276 모던 웨스턴 소가죽 벨트 18mm","price":29890,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20250929/5546375/5546375_17591356105498_big.jpg?w=780","link":"https://www.musinsa.com/products/5546375"},
+{"styleTag":"유니크","category":"신발","brand":"킨","name":"유니크 남성 샌들 Black","price":135200,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20260707/6799166/6799166_17839126209781_big.jpg?w=780","link":"https://www.musinsa.com/products/6799166"},
+{"styleTag":"유니크","category":"신발","brand":"킨","name":"유니크 남성 샌들 Magnet/Steel Grey","price":143650,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20260713/6830318/6830318_17839129225074_big.jpg?w=780","link":"https://www.musinsa.com/products/6830318"},
+{"styleTag":"유니크","category":"기타","brand":"파시에라","name":"남녀공용 유니크호보백_N피시스01","price":49400,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20210927/2147866/2147866_17261900319764_big.jpg?w=780","link":"https://www.musinsa.com/products/2147866"},
+{"styleTag":"유니크","category":"아우터","brand":"효지","name":"유니크 2버튼 크롭 자켓 (7컬러)","price":65020,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20230907/3543005/3543005_17261044244672_big.jpg?w=780","link":"https://www.musinsa.com/products/3543005"},
+{"styleTag":"유니크","category":"아우터","brand":"버닝카포네","name":"BC Unique Embroidery Padding 블랙","price":129000,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20241111/4604410/4604410_17313104112729_big.jpg?w=780","link":"https://www.musinsa.com/products/4604410"},
+{"styleTag":"유니크","category":"아우터","brand":"버닝카포네","name":"BC Unique Embroidery Padding 카키브라운","price":129000,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20241111/4604409/4604409_17313104987939_big.jpg?w=780","link":"https://www.musinsa.com/products/4604409"},
+{"styleTag":"유니크","category":"하의","brand":"비욘드클로젯","name":"노맨틱 헤비 웨이트 유니크 포켓 디테일 저지 팬츠 네이비","price":62300,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20250819/5335372/5335372_17555711366768_big.jpg?w=780","link":"https://www.musinsa.com/products/5335372"},
+{"styleTag":"유니크","category":"아우터","brand":"더블유브이프로젝트","name":"유니크 데님 워크자켓 블루 JNOT7738","price":78900,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20240905/4407241/4407241_17254975045818_big.jpg?w=780","link":"https://www.musinsa.com/products/4407241"},
+{"styleTag":"미니멀","category":"상의","brand":"노드유","name":"라글란 헨리넥 리브드 크롭 니트 [블랙]","price":33000,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20260609/6634029/6634029_17810575026957_big.jpg?w=780","link":"https://www.musinsa.com/products/6634029"},
+{"styleTag":"미니멀","category":"상의","brand":"미니멀프로젝트","name":"피그먼트 스몰로고 오버핏 반팔티셔츠 MST145 [WHITE]","price":21800,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20230405/3210504/3210504_16818715634115_big.jpg?w=780","link":"https://www.musinsa.com/products/3210504"},
+{"styleTag":"미니멀","category":"상의","brand":"누아트 스튜디오","name":"베이직 무지 코튼 라운드 넥 티셔츠 4종","price":17900,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20260519/6507160/6507160_17800347632642_big.jpg?w=780","link":"https://www.musinsa.com/products/6507160"},
+{"styleTag":"미니멀","category":"상의","brand":"프리즘웍스","name":"HENLEY NECK HALF TEE _ BLACK","price":28900,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20190502/1032580/1032580_17736722180365_big.jpg?w=780","link":"https://www.musinsa.com/products/1032580"},
+{"styleTag":"미니멀","category":"아우터","brand":"프리즘웍스","name":"BUDDY HARRINGTON JACKET _ NAVY","price":117300,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20230221/3096448/3096448_17562763381199_big.jpg?w=780","link":"https://www.musinsa.com/products/3096448"},
+{"styleTag":"미니멀","category":"아우터","brand":"노드유","name":"골지 라운드 반팔 가디건 [블랙]","price":34200,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20250611/5178636/5178636_17497996690747_big.jpg?w=780","link":"https://www.musinsa.com/products/5178636"},
+{"styleTag":"미니멀","category":"아우터","brand":"미니멀프로젝트","name":"솔리드 스냅 블루종 자켓 MJK114 [BEIGE]","price":66900,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20230216/3087893/3087893_16814528547629_big.jpg?w=780","link":"https://www.musinsa.com/products/3087893"},
+{"styleTag":"미니멀","category":"아우터","brand":"무신사 스탠다드","name":"릴렉스드 미니멀 재킷 [블랙]","price":85390,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20240112/3790860/3790860_17217992992120_big.jpg?w=780","link":"https://www.musinsa.com/products/3790860"},
+{"styleTag":"미니멀","category":"하의","brand":"무신사 스탠다드","name":"[쿨탠다드] 쿨링 루즈 테이퍼드 밴딩 팬츠 [카키]","price":37090,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20240226/3899398/3899398_17140029821817_big.jpg?w=780","link":"https://www.musinsa.com/products/3899398"},
+{"styleTag":"미니멀","category":"하의","brand":"미니멀프로젝트","name":"미니멀 자수 로고 와이드 하프 팬츠 MSP305 [BLACK]","price":31800,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20260504/6416178/6416178_17778723045240_big.jpg?w=780","link":"https://www.musinsa.com/products/6416178"},
+{"styleTag":"미니멀","category":"하의","brand":"유니온블루","name":"TWO TUCK WIDE SWEAT PANTS [BLACK]","price":71100,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20231206/3745506/3745506_17018394030249_big.jpg?w=780","link":"https://www.musinsa.com/products/3745506"},
+{"styleTag":"미니멀","category":"신발","brand":"닥터마틴","name":"단테 - 화이트 / 22127100","price":84990,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20190809/1115031/1115031_3_big.jpg?w=780","link":"https://www.musinsa.com/products/1115031"},
+{"styleTag":"미니멀","category":"신발","brand":"조셉트","name":"SIMON BLACK","price":106000,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20231031/3673920/3673920_17403772374139_big.jpg?w=780","link":"https://www.musinsa.com/products/3673920"},
+{"styleTag":"미니멀","category":"신발","brand":"야세","name":"클래식 레인로퍼 블랙","price":29500,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20240430/4096084/4096084_17192114786385_big.png?w=780","link":"https://www.musinsa.com/products/4096084"},
+{"styleTag":"이지캐주얼","category":"상의","brand":"아웃스탠딩","name":"LIFE IS TEE SURF RIDE TEE_PIGMENT CHARCOAL","price":37100,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20220504/2540678/2540678_17739981181294_big.jpg?w=780","link":"https://www.musinsa.com/products/2540678"},
+{"styleTag":"이지캐주얼","category":"상의","brand":"이지노이지","name":"홀스 엠블럼 자수 카라 티셔츠 - 그레이","price":49900,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20260514/6482853/6482853_17798573410180_big.jpg?w=780","link":"https://www.musinsa.com/products/6482853"},
+{"styleTag":"이지캐주얼","category":"상의","brand":"바이모노","name":"쏙쏙셔츠 옥스포드 자동넣입 반팔 셔츠","price":34900,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20260617/6685521/6685521_17846146759221_big.jpg?w=780","link":"https://www.musinsa.com/products/6685521"},
+{"styleTag":"이지캐주얼","category":"아우터","brand":"에즈카톤","name":"이지 크롭 피그먼트 후드집업 딥그레이 MMOT6762","price":43900,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20240228/3907413/3907413_17090796172441_big.jpg?w=780","link":"https://www.musinsa.com/products/3907413"},
+{"styleTag":"이지캐주얼","category":"아우터","brand":"이즈","name":"스탠다드 자켓_블랙","price":148000,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20210427/1923949/1923949_1_big.jpg?w=780","link":"https://www.musinsa.com/products/1923949"},
+{"styleTag":"이지캐주얼","category":"아우터","brand":"바이모노","name":"[빅사이즈 M-6XL] 모노 캐시라이크 트러커 자켓","price":99900,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20251218/5840362/5840362_17660498729660_big.jpg?w=780","link":"https://www.musinsa.com/products/5840362"},
+{"styleTag":"이지캐주얼","category":"아우터","brand":"프레리","name":"[올시즌] 울 블렌디드 블레이저 (GRAY)","price":45310,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20190617/1073845/1073845_17628203256466_big.jpg?w=780","link":"https://www.musinsa.com/products/1073845"},
+{"styleTag":"이지캐주얼","category":"하의","brand":"굿라이프웍스","name":"이지 와이드 데님 팬츠 그레이","price":32370,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20210826/2092852/2092852_17086532214128_big.jpg?w=780","link":"https://www.musinsa.com/products/2092852"},
+{"styleTag":"이지캐주얼","category":"신발","brand":"나이키","name":"에어 맥스 모토 2K M - 오프 화이트:메탈릭 실버:하이퍼 터콰이즈:블랙 / IR1476-101","price":114480,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20260427/6380004/6380004_17773632160926_big.jpg?w=780","link":"https://www.musinsa.com/products/6380004"},
+{"styleTag":"이지캐주얼","category":"신발","brand":"반스","name":"[VANS X SOON EASY] 프리미엄 어센틱 44 LX - 타우페 미스트:페이디드 블랙 / VN000EAKG2M1","price":80990,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20260515/6487959/6487959_17799550424005_big.jpg?w=780","link":"https://www.musinsa.com/products/6487959"},
+{"styleTag":"이지캐주얼","category":"신발","brand":"커스텀에이드","name":"포든 소가죽 이지라이트 페니로퍼 4cm (CR0038BK)","price":83390,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20210219/1803515/1803515_16947524872675_big.jpg?w=780","link":"https://www.musinsa.com/products/1803515"},
+{"styleTag":"이지캐주얼","category":"신발","brand":"무신사 스탠다드","name":"캔버스 벌커나이즈드 스니커즈 [오프 화이트]","price":32290,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20220325/2444813/2444813_3_big.jpg?w=780","link":"https://www.musinsa.com/products/2444813"},
+{"styleTag":"스트릿","category":"상의","brand":"낫유즈얼","name":"고딕크로스 오버핏 반팔티 4color","price":32360,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20260327/6211293/6211293_17775172289039_big.jpg?w=780","link":"https://www.musinsa.com/products/6211293"},
+{"styleTag":"스트릿","category":"상의","brand":"챔피온","name":"[2pack] 릴렉스핏 크루넥 래글런 롱슬리브 티셔츠 Black/Navy","price":44800,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20260325/6192549/6192549_17750341545276_big.jpg?w=780","link":"https://www.musinsa.com/products/6192549"},
+{"styleTag":"스트릿","category":"아우터","brand":"챔피온","name":"퀼팅 푸퍼 패딩 재킷 2 color","price":91400,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20250917/5480129/5480129_17636168704497_big.jpg?w=780","link":"https://www.musinsa.com/products/5480129"},
+{"styleTag":"스트릿","category":"아우터","brand":"챔피온","name":"트랙 로고 프로 컬러블록 트랙자켓 Black","price":96800,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20260212/6015144/6015144_17736317077443_big.jpg?w=780","link":"https://www.musinsa.com/products/6015144"},
+{"styleTag":"스트릿","category":"아우터","brand":"제멋","name":"리치 오버 MA-1 자켓 블랙 YHJK2269","price":69800,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20200205/1291017/1291017_1_big.jpg?w=780","link":"https://www.musinsa.com/products/1291017"},
+{"styleTag":"스트릿","category":"아우터","brand":"디스이즈네버댓","name":"T-Light Jacket Grey","price":97300,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20260206/5992470/5992470_17706971987354_big.jpg?w=780","link":"https://www.musinsa.com/products/5992470"},
+{"styleTag":"스트릿","category":"하의","brand":"더마일","name":"CN 카고 벌룬 팬츠 [BLACK]","price":60700,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20240927/4470348/4470348_17274132538617_big.jpg?w=780","link":"https://www.musinsa.com/products/4470348"},
+{"styleTag":"스트릿","category":"하의","brand":"낫포너드","name":"Parachute Nylon Cargo Pants - Black","price":43500,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20230905/3528683/3528683_16970733118457_big.jpg?w=780","link":"https://www.musinsa.com/products/3528683"},
+{"styleTag":"스트릿","category":"하의","brand":"디미트리블랙","name":"VLAD 커브드 밴딩 카고 팬츠_카키","price":33900,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20260310/6110843/6110843_17733778014932_big.jpg?w=780","link":"https://www.musinsa.com/products/6110843"},
+{"styleTag":"스트릿","category":"하의","brand":"커스텀어클락","name":"나일론 벌룬 카고 팬츠 3 COLOR COOSPT242","price":19900,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20250319/4918825/4918825_17429679929713_big.jpg?w=780","link":"https://www.musinsa.com/products/4918825"},
+{"styleTag":"스트릿","category":"신발","brand":"아디다스","name":"가젤 인도어 - 블랙 / JI2060","price":63600,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20240627/4222747/4222747_17195430153302_big.jpg?w=780","link":"https://www.musinsa.com/products/4222747"},
+{"styleTag":"스트릿","category":"신발","brand":"비에스큐티바이클래시","name":"b2424 러시모어 펀칭 텐션 슬라이드","price":49840,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20250610/5174056/5174056_17496072509355_big.jpg?w=780","link":"https://www.musinsa.com/products/5174056"},
+{"styleTag":"스트릿","category":"신발","brand":"크록스","name":"에코 웨이브 - 블랙 샌드 / 210521-0LD","price":59990,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20250203/4750834/4750834_17393499446417_big.jpg?w=780","link":"https://www.musinsa.com/products/4750834"},
+{"styleTag":"시티보이","category":"상의","brand":"후크","name":"더 시티 스트라이프 셔츠 (차콜블랙)","price":36500,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20250218/4797203/4797203_17398583796881_big.jpg?w=780","link":"https://www.musinsa.com/products/4797203"},
+{"styleTag":"시티보이","category":"아우터","brand":"미니멀프로젝트","name":"오버사이즈 히든 포켓 셔켓 MJK115 [BLACK]","price":59900,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20230216/3087912/3087912_17032210474560_big.jpg?w=780","link":"https://www.musinsa.com/products/3087912"},
+{"styleTag":"시티보이","category":"아우터","brand":"헬로 선라이즈","name":"HS Safari Shirt Jacket_Sky Blue","price":67200,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20231026/3662180/3662180_16983077881312_big.jpg?w=780","link":"https://www.musinsa.com/products/3662180"},
+{"styleTag":"시티보이","category":"아우터","brand":"와이케이","name":"D링 집업 셔츠 자켓 네이비","price":86800,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20220308/2405424/2405424_1_big.jpg?w=780","link":"https://www.musinsa.com/products/2405424"},
+{"styleTag":"시티보이","category":"아우터","brand":"고스트릿","name":"오버핏 체크 셔츠 아노락 네이비","price":71200,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20250410/5013841/5013841_17442779286333_big.jpg?w=780","link":"https://www.musinsa.com/products/5013841"},
+{"styleTag":"시티보이","category":"하의","brand":"무신사 스탠다드","name":"리버스 투 턱 세미 벌룬 히든 밴딩 슬랙스 [크림]","price":29690,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20230130/3045287/3045287_16790210008937_big.jpg?w=780","link":"https://www.musinsa.com/products/3045287"},
+{"styleTag":"시티보이","category":"하의","brand":"무신사 스탠다드","name":"14W 코듀로이 원 턱 와이드 밴딩 팬츠 [블랙]","price":49900,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20240821/4352410/4352410_17333845040406_big.jpg?w=780","link":"https://www.musinsa.com/products/4352410"},
+{"styleTag":"시티보이","category":"하의","brand":"카고브로스","name":"헤비 밴딩 와이드 슬랙스 (베이지)","price":52500,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20230926/3594135/3594135_16956905354914_big.jpg?w=780","link":"https://www.musinsa.com/products/3594135"},
+{"styleTag":"시티보이","category":"신발","brand":"노버크","name":"GUDONGHWA LOAFER","price":59500,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20260129/5953938/5953938_17822001723023_big.png?w=780","link":"https://www.musinsa.com/products/5953938"},
+{"styleTag":"시티보이","category":"신발","brand":"더노피","name":"루시안 클래식 4cm 페니로퍼 블랙 [250-290mm 5단위]","price":51800,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20251215/5828992/5828992_17681887524685_big.jpg?w=780","link":"https://www.musinsa.com/products/5828992"},
+{"styleTag":"시티보이","category":"신발","brand":"엘칸토","name":"마쯔 남성 페니 로퍼 3.5cm LCMD82I111","price":35900,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20210203/1775338/1775338_1_big.jpg?w=780","link":"https://www.musinsa.com/products/1775338"},
+{"styleTag":"시티보이","category":"신발","brand":"비제바노","name":"오스틴 01 남성 로퍼-블랙","price":59600,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20250722/5263310/5263310_17531653536768_big.jpg?w=780","link":"https://www.musinsa.com/products/5263310"},
+{"styleTag":"아메카지","category":"상의","brand":"유나이티드 애슬","name":"9.1oz 헤비 듀티 반팔 티셔츠_화이트","price":21500,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20240815/4333594/4333594_17846157967516_big.png?w=780","link":"https://www.musinsa.com/products/4333594"},
+{"styleTag":"아메카지","category":"상의","brand":"아웃사이드프로그","name":"레트로 그리즐리 티셔츠 (베이지)","price":37600,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20250526/5146817/5146817_17482478940591_big.png?w=780","link":"https://www.musinsa.com/products/5146817"},
+{"styleTag":"아메카지","category":"아우터","brand":"유니폼브릿지","name":"[유튜버PICK] G-9 blouson jacket black","price":71710,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20240801/4290295/4290295_17225049503154_big.jpg?w=780","link":"https://www.musinsa.com/products/4290295"},
+{"styleTag":"아메카지","category":"아우터","brand":"스미스아머","name":"SA 리버시블 MA-1 봄버 자켓_블랙","price":125600,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20241010/4500338/4500338_17285991035339_big.jpg?w=780","link":"https://www.musinsa.com/products/4500338"},
+{"styleTag":"아메카지","category":"아우터","brand":"와일드 브릭스","name":"CL HARRINGTON JACKET (beige)","price":228000,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20230228/3113283/3113283_16775654940604_big.jpg?w=780","link":"https://www.musinsa.com/products/3113283"},
+{"styleTag":"아메카지","category":"아우터","brand":"브론슨","name":"47806XX 1947 Type 1 Selvedge Denim Jacket","price":177840,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20260522/6536825/6536825_17805777605411_big.jpg?w=780","link":"https://www.musinsa.com/products/6536825"},
+{"styleTag":"아메카지","category":"하의","brand":"유니폼브릿지","name":"wide one tuck denim pants black washed","price":29710,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20230119/3033207/3033207_16752502070167_big.jpg?w=780","link":"https://www.musinsa.com/products/3033207"},
+{"styleTag":"아메카지","category":"하의","brand":"벤 데이비스","name":"오리지널 데님 페인터 팬츠 인디고","price":124200,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20190822/1125210/1125210_17509200762967_big.jpg?w=780","link":"https://www.musinsa.com/products/1125210"},
+{"styleTag":"아메카지","category":"하의","brand":"모아","name":"페인팅 루즈 데님 팬츠 (BLUE)","price":39500,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20210805/2050746/2050746_3_big.jpg?w=780","link":"https://www.musinsa.com/products/2050746"},
+{"styleTag":"아메카지","category":"신발","brand":"슈페너","name":"도우 더비 블랙","price":69500,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20230411/3222673/3222673_17544509968103_big.jpg?w=780","link":"https://www.musinsa.com/products/3222673"},
+{"styleTag":"아메카지","category":"신발","brand":"커스텀에이드","name":"루카스 소가죽 코만도 워커 5cm (CR0049BK)","price":98690,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20210907/2113397/2113397_17207514604097_big.jpg?w=780","link":"https://www.musinsa.com/products/2113397"},
+{"styleTag":"아메카지","category":"신발","brand":"쏘로굿","name":"American Heritage 6인치 목토 부츠 4203 Crazy Horse","price":347600,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20180808/825317/825317_17254233336528_big.jpg?w=780","link":"https://www.musinsa.com/products/825317"},
+{"styleTag":"아메카지","category":"신발","brand":"데이빗스톤","name":"DVS 오리지널 레더 워크부츠 TYPE01","price":279000,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20260327/6206926/6206926_17745441705399_big.jpg?w=780","link":"https://www.musinsa.com/products/6206926"},
+{"styleTag":"스포티","category":"상의","brand":"챔피온","name":"베이직 C로고 후드 티셔츠 Cream","price":20000,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20230302/3116779/3116779_17470104810412_big.jpg?w=780","link":"https://www.musinsa.com/products/3116779"},
+{"styleTag":"스포티","category":"상의","brand":"아디다스","name":"오버사이즈 크루 스웨트셔츠 - 그린 / KA0467","price":46990,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20250902/5391597/5391597_17629924622740_big.jpg?w=780","link":"https://www.musinsa.com/products/5391597"},
+{"styleTag":"스포티","category":"상의","brand":"챔피온","name":"스몰 스크립트 로고 크루넥 스웨트셔츠 Normal Navy","price":24000,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20240910/4425068/4425068_17429702201874_big.jpg?w=780","link":"https://www.musinsa.com/products/4425068"},
+{"styleTag":"스포티","category":"아우터","brand":"나이키","name":"클럽 후드 재킷 M - 블랙:화이트 / HJ2013-010","price":116100,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20250115/4723275/4723275_17370909990772_big.jpg?w=780","link":"https://www.musinsa.com/products/4723275"},
+{"styleTag":"스포티","category":"아우터","brand":"챔피온","name":"C로고 후드 집업 Cream","price":40000,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20220819/2729699/2729699_17430483051265_big.jpg?w=780","link":"https://www.musinsa.com/products/2729699"},
+{"styleTag":"스포티","category":"아우터","brand":"아디다스","name":"ADILENIUM 3 오버사이즈 트랙탑 - 다크그레이 / KD4187","price":96990,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20250922/5503180/5503180_17593624114740_big.jpg?w=780","link":"https://www.musinsa.com/products/5503180"},
+{"styleTag":"스포티","category":"아우터","brand":"시그니처","name":"투웨이 크롭 후드 집업[그레이]","price":39900,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20250812/5314397/5314397_17755495863528_big.jpg?w=780","link":"https://www.musinsa.com/products/5314397"},
+{"styleTag":"스포티","category":"하의","brand":"토피","name":"사이드 라인 트랙 팬츠 (NAVY)","price":38900,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20250826/5363832/5363832_17565327732987_big.jpg?w=780","link":"https://www.musinsa.com/products/5363832"},
+{"styleTag":"스포티","category":"하의","brand":"브렌슨","name":"(Renew Ver.) 원턱 와이드 스웨트 팬츠 ( 8Color ) ( 기모선택 )","price":27970,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20210315/1844582/1844582_17774456564921_big.jpg?w=780","link":"https://www.musinsa.com/products/1844582"},
+{"styleTag":"스포티","category":"신발","brand":"나이키","name":"페가수스 42 M - 서밋 화이트:포톤 더스트:블랙:메탈릭 실버 / II7210-100","price":121680,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20260402/6245026/6245026_17788064770202_big.jpg?w=780","link":"https://www.musinsa.com/products/6245026"},
+{"styleTag":"스포티","category":"신발","brand":"뉴발란스","name":"NBPFGF701Z / 1080 V15 (남성, 2E) (BLUE)","price":209000,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20260714/6837028/6837028_17845902481753_big.jpg?w=780","link":"https://www.musinsa.com/products/6837028"},
+{"styleTag":"스포티","category":"신발","brand":"아디다스","name":"하이퍼부스트 런 러닝화 M - 화이트:코어블랙 / IH9467","price":219000,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20260723/6907034/6907034_17853137187754_big.jpg?w=780","link":"https://www.musinsa.com/products/6907034"},
+{"styleTag":"모던캐주얼","category":"상의","brand":"아날로그무드","name":"모던 단가라 스트라이프 반팔니트 (아이보리)","price":47500,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20260527/6552674/6552674_17798519223552_big.jpg?w=780","link":"https://www.musinsa.com/products/6552674"},
+{"styleTag":"모던캐주얼","category":"상의","brand":"비욘드클로젯","name":"노맨틱 모던 아가일 소프트 니트 그레이","price":62300,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20260212/6015044/6015044_17708549221882_big.jpg?w=780","link":"https://www.musinsa.com/products/6015044"},
+{"styleTag":"모던캐주얼","category":"상의","brand":"러기드하우스","name":"모던 헨리넥 와플 반팔티 네이비","price":49500,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20240514/4129037/4129037_17156621044059_big.jpg?w=780","link":"https://www.musinsa.com/products/4129037"},
+{"styleTag":"모던캐주얼","category":"상의","brand":"브렌우드","name":"[워셔블] 모던 스트라이프 라운드넥 스웨터 BRWAM25621NYX","price":56800,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20250407/4993589/4993589_17440046876618_big.jpg?w=780","link":"https://www.musinsa.com/products/4993589"},
+{"styleTag":"모던캐주얼","category":"아우터","brand":"어나더 오피스","name":"Modern N-3B Coat (Charcoal)","price":378000,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20260227/6066568/6066568_17730198481242_big.jpg?w=780","link":"https://www.musinsa.com/products/6066568"},
+{"styleTag":"모던캐주얼","category":"아우터","brand":"커스텀어스","name":"Modern 더플 코트 CXS19WWCTA71","price":75800,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20191205/1244042/1244042_1_big.jpg?w=780","link":"https://www.musinsa.com/products/1244042"},
+{"styleTag":"모던캐주얼","category":"아우터","brand":"더 베리 띵","name":"T/modern soft tailored coat_BG","price":59500,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20190927/1168935/1168935_1_big.jpg?w=780","link":"https://www.musinsa.com/products/1168935"},
+{"styleTag":"모던캐주얼","category":"하의","brand":"스트라이크","name":"모던 클래식 스트레이트 트라우저스 (3COLOR)","price":71100,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20241017/4531556/4531556_17310341740674_big.jpg?w=780","link":"https://www.musinsa.com/products/4531556"},
+{"styleTag":"모던캐주얼","category":"하의","brand":"모던아론","name":"포시 원턱 와이드 슬랙스 챠콜","price":39000,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20250331/4965297/4965297_17433963891384_big.jpg?w=780","link":"https://www.musinsa.com/products/4965297"},
+{"styleTag":"모던캐주얼","category":"하의","brand":"스트라이크","name":"Modern TR One Tuck Trousers (4 Colors)","price":70200,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20260325/6189384/6189384_17743670681412_big.jpg?w=780","link":"https://www.musinsa.com/products/6189384"},
+{"styleTag":"모던캐주얼","category":"신발","brand":"더노피","name":"아르코 코만도 아웃솔 4홀 더비슈즈 블랙 [245-290mm]","price":49800,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20250724/5270777/5270777_17538487937054_big.jpg?w=780","link":"https://www.musinsa.com/products/5270777"},
+{"styleTag":"모던캐주얼","category":"신발","brand":"조셉트","name":"JOSEPHT101 BLACK [VIBRAM/GOODYEAR/BOX CALF]","price":228000,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20231031/3673734/3673734_17139376463899_big.jpg?w=780","link":"https://www.musinsa.com/products/3673734"},
+{"styleTag":"모던캐주얼","category":"신발","brand":"슈피트","name":"클리퍼 4홀 더비슈즈 무광 블랙 구두 SFT-101","price":49320,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20240617/4201989/4201989_17188863362811_big.jpg?w=780","link":"https://www.musinsa.com/products/4201989"},
+{"styleTag":"모던캐주얼","category":"신발","brand":"피렌체 아뜨리에","name":"[SECOND.A] 볼륨 라운드토 5CM 더비슈즈 2NDF2700GB [BLACK]","price":80640,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20260115/5897478/5897478_17684425506727_big.jpg?w=780","link":"https://www.musinsa.com/products/5897478"},
+{"styleTag":"유니크","category":"상의","brand":"스튜디오 톰보이","name":"[MEN] UNIQUE 프린트 티셔츠_화이트 91M5222315","price":69000,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20250406/4991343/4991343_17512806856755_big.jpg?w=780","link":"https://www.musinsa.com/products/4991343"},
+{"styleTag":"유니크","category":"상의","brand":"캔바츠","name":"스트링 래글런 맨투맨 유니크 (레드)","price":68600,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20240311/3938586/3938586_17289551345587_big.jpg?w=780","link":"https://www.musinsa.com/products/3938586"},
+{"styleTag":"유니크","category":"상의","brand":"밴웍스","name":"블록코어 유니크 맨투맨 티셔츠 (VLS0003) 화이트/블랙","price":29400,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20230822/3484196/3484196_16926720134537_big.jpg?w=780","link":"https://www.musinsa.com/products/3484196"},
+{"styleTag":"유니크","category":"상의","brand":"밴웍스","name":"져지 블록코어 유니크 맨투맨 (VLS0014) 블랙/화이트","price":29500,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20230914/3561146/3561146_16946730176470_big.jpg?w=780","link":"https://www.musinsa.com/products/3561146"},
+{"styleTag":"유니크","category":"아우터","brand":"챌린저","name":"남성 유니크 우븐믹스 하이넥 아노락 블랙","price":147200,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20250906/5412085/5412085_17571386034185_big.jpg?w=780","link":"https://www.musinsa.com/products/5412085"},
+{"styleTag":"유니크","category":"아우터","brand":"비욘드클로젯","name":"[COLLECTION LINE] 레트로 체크 유니크 로고 하프 집업 플리스 그린","price":82800,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20251111/5717137/5717137_17634554460648_big.jpg?w=780","link":"https://www.musinsa.com/products/5717137"},
+{"styleTag":"유니크","category":"하의","brand":"무신사 스탠다드","name":"스트레이트 패널드 백 슬릿 데님 팬츠 [그레이]","price":34890,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20230809/3455325/3455325_16952641570363_big.jpg?w=780","link":"https://www.musinsa.com/products/3455325"},
+{"styleTag":"유니크","category":"하의","brand":"플레이스스튜디오맨","name":"와이드 벨티드 버클 코듀로이 유니크 코튼 밴딩 팬츠[크림]","price":29400,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20250304/4852702/4852702_17415761595778_big.jpg?w=780","link":"https://www.musinsa.com/products/4852702"},
+{"styleTag":"유니크","category":"신발","brand":"텍토","name":"TECTOE balance 뮬 슬라이드","price":76050,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20250320/4922018/4922018_17754451814098_big.jpg?w=780","link":"https://www.musinsa.com/products/4922018"},
+{"styleTag":"유니크","category":"신발","brand":"킨","name":"유니크 2.0 워킹 남성 샌들 BLACK/BLACK","price":215100,"image":"https://image.msscdn.net/thumbnails/images/goods_img/20250321/4926026/4926026_17751126506628_big.jpg?w=780","link":"https://www.musinsa.com/products/4926026"}
+];
 
-function renderMainTabs() {
-  const el = document.getElementById('mainTabs');
-  el.innerHTML = MAIN_TABS.map(t =>
-    `<button class="main-tab ${state.mainTab===t.id?'active':''}" data-tab="${t.id}">${t.label}</button>`
-  ).join('');
-  el.querySelectorAll('.main-tab').forEach(btn => {
+// ============ STATE ============
+let deckOrder = [];
+let deckIndex = 0;
+let scores = {}; // styleTag -> score
+
+function loadSwipeState() {
+  try {
+    const raw = localStorage.getItem('swipeState');
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) { return null; }
+}
+function saveSwipeState() {
+  localStorage.setItem('swipeState', JSON.stringify({ deckIndex, scores, deckOrder }));
+}
+function resetSwipeState() {
+  localStorage.removeItem('swipeState');
+  deckOrder = shuffle(LOOKS.map((_, i) => i));
+  deckIndex = 0;
+  scores = {};
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ============ DECK RENDERING ============
+function fmt(n) { return n.toLocaleString('ko-KR') + '원'; }
+
+function renderDeck() {
+  const deck = document.getElementById('deck');
+  const progressText = document.getElementById('progressText');
+
+  if (deckIndex >= deckOrder.length) {
+    showResults();
+    return;
+  }
+
+  progressText.textContent = `${deckIndex + 1} / ${deckOrder.length}`;
+
+  // render current + next 2 cards stacked for depth effect
+  deck.innerHTML = '';
+  const visibleCount = Math.min(3, deckOrder.length - deckIndex);
+  for (let offset = visibleCount - 1; offset >= 0; offset--) {
+    const look = LOOKS[deckOrder[deckIndex + offset]];
+    const card = document.createElement('div');
+    card.className = 'swipe-card';
+    card.style.zIndex = String(10 - offset);
+    card.style.transform = offset === 0 ? 'translateY(0) scale(1)' : `translateY(${offset * 8}px) scale(${1 - offset * 0.04})`;
+    card.style.opacity = offset === 0 ? '1' : String(1 - offset * 0.25);
+    card.innerHTML = `
+      <img src="${look.image}" alt="${look.styleTag}" loading="lazy">
+      <div class="tag-badge">${look.styleTag}</div>
+      ${offset === 0 ? '<div class="stamp like" id="stampLike">LIKE</div><div class="stamp nope" id="stampNope">NOPE</div>' : ''}
+    `;
+    if (offset === 0) wireDrag(card, look.styleTag);
+    deck.appendChild(card);
+  }
+}
+
+function wireDrag(card, styleTag) {
+  let startX = 0, startY = 0, curX = 0, dragging = false;
+  const stampLike = card.querySelector('#stampLike');
+  const stampNope = card.querySelector('#stampNope');
+
+  function onDown(x, y) { dragging = true; startX = x; startY = y; card.style.transition = 'none'; }
+  function onMove(x, y) {
+    if (!dragging) return;
+    curX = x - startX;
+    const rot = curX / 18;
+    card.style.transform = `translate(${curX}px, ${(y - startY) * 0.15}px) rotate(${rot}deg)`;
+    const ratio = Math.min(Math.abs(curX) / 100, 1);
+    if (curX > 0) { stampLike.style.opacity = ratio; stampNope.style.opacity = 0; }
+    else { stampNope.style.opacity = ratio; stampLike.style.opacity = 0; }
+  }
+  function onUp() {
+    if (!dragging) return;
+    dragging = false;
+    card.style.transition = 'transform .25s ease, opacity .25s ease';
+    if (curX > 100) { commitSwipe(true, styleTag, card); }
+    else if (curX < -100) { commitSwipe(false, styleTag, card); }
+    else { card.style.transform = 'translate(0,0) rotate(0)'; stampLike.style.opacity = 0; stampNope.style.opacity = 0; }
+    curX = 0;
+  }
+
+  card.addEventListener('pointerdown', (e) => { card.setPointerCapture(e.pointerId); onDown(e.clientX, e.clientY); });
+  card.addEventListener('pointermove', (e) => onMove(e.clientX, e.clientY));
+  card.addEventListener('pointerup', onUp);
+  card.addEventListener('pointercancel', onUp);
+}
+
+function commitSwipe(liked, styleTag, card) {
+  card.style.transform = `translate(${liked ? 600 : -600}px, -40px) rotate(${liked ? 25 : -25}deg)`;
+  card.style.opacity = '0';
+  scores[styleTag] = (scores[styleTag] || 0) + (liked ? 1 : -1);
+  deckIndex++;
+  saveSwipeState();
+  setTimeout(renderDeck, 220);
+}
+
+document.getElementById('btnLike').addEventListener('click', () => {
+  const card = document.querySelector('.swipe-card[style*="z-index: 10"]') || document.querySelector('.swipe-card:last-child');
+  if (!card) return;
+  const look = LOOKS[deckOrder[deckIndex]];
+  commitSwipe(true, look.styleTag, card);
+});
+document.getElementById('btnNope').addEventListener('click', () => {
+  const card = document.querySelector('.swipe-card[style*="z-index: 10"]') || document.querySelector('.swipe-card:last-child');
+  if (!card) return;
+  const look = LOOKS[deckOrder[deckIndex]];
+  commitSwipe(false, look.styleTag, card);
+});
+
+// ============ RESULTS ============
+function showResults() {
+  document.getElementById('deckWrap').classList.add('hidden');
+  const resultWrap = document.getElementById('resultWrap');
+  resultWrap.classList.add('active');
+
+  const positiveTags = Object.entries(scores).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
+  const totalPositive = positiveTags.reduce((s, [, v]) => s + v, 0) || 1;
+
+  const tasteBars = document.getElementById('tasteBars');
+  if (positiveTags.length === 0) {
+    tasteBars.innerHTML = `<div style="color:var(--text-dim); font-size:13px;">좋아요를 누른 스타일이 없어서 취향을 판단하기 어려워요. 다시 스와이프해보세요.</div>`;
+  } else {
+    tasteBars.innerHTML = positiveTags.slice(0, 5).map(([tag, v]) => {
+      const pct = Math.round((v / totalPositive) * 100);
+      return `
+        <div class="taste-bar-row">
+          <div class="taste-bar-label"><b>${tag}</b><span>${pct}%</span></div>
+          <div class="taste-bar-track"><div class="taste-bar-fill" style="width:${pct}%"></div></div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  renderRecommendations(positiveTags.map(([tag]) => tag));
+}
+
+const CATEGORY_ORDER = ["아우터", "상의", "하의", "신발", "기타"];
+const REC_PAGE_SIZE = 6;
+let recGrouped = {};
+let recVisible = {};
+
+function renderRecommendations(topTags) {
+  const grid = document.getElementById('recGrid');
+  const top3 = topTags.slice(0, 3);
+  if (top3.length === 0) {
+    grid.innerHTML = '<div style="color:var(--text-dim); font-size:13px;">취향 데이터가 부족해 추천을 만들 수 없어요.</div>';
+    return;
+  }
+
+  recGrouped = {};
+  CATEGORY_ORDER.forEach(cat => {
+    let catItems = [];
+    top3.forEach(tag => {
+      const pool = STYLE_PRODUCTS.filter(p => p.category === cat && p.styleTag === tag);
+      catItems = catItems.concat(pool);
+    });
+    const seen = new Set();
+    catItems = catItems.filter(p => { if (seen.has(p.link)) return false; seen.add(p.link); return true; });
+    if (catItems.length) recGrouped[cat] = catItems;
+  });
+
+  if (Object.keys(recGrouped).length === 0) {
+    grid.innerHTML = '<div style="color:var(--text-dim); font-size:13px;">매칭되는 상품이 없어요.</div>';
+    return;
+  }
+
+  recVisible = {};
+  CATEGORY_ORDER.forEach(cat => { if (recGrouped[cat]) recVisible[cat] = REC_PAGE_SIZE; });
+
+  renderRecGrid();
+}
+
+function recCardHtml(p) {
+  return `
+    <a class="rec-card" href="${p.link}" target="_blank" rel="noopener noreferrer">
+      <div class="rec-img"><img src="${p.image}" alt="${p.name}" loading="lazy"></div>
+      <div class="rec-body">
+        <div class="rec-brand">${p.brand}</div>
+        <div class="rec-name">${p.name}</div>
+        <div class="rec-price">${fmt(p.price)}</div>
+        <div class="rec-match">${p.styleTag} 매칭</div>
+      </div>
+    </a>
+  `;
+}
+
+function renderRecGrid() {
+  const grid = document.getElementById('recGrid');
+  grid.innerHTML = CATEGORY_ORDER.filter(cat => recGrouped[cat]).map(cat => {
+    const all = recGrouped[cat];
+    const visible = recVisible[cat] || REC_PAGE_SIZE;
+    const shown = all.slice(0, visible);
+    const hasMore = all.length > visible;
+    return `
+      <div class="rec-category-block">
+        <div class="rec-subtitle">${cat} <span class="rec-count">${all.length}개</span></div>
+        <div class="rec-grid">
+          ${shown.map(recCardHtml).join('')}
+        </div>
+        ${hasMore ? `<button class="more-btn" data-cat="${cat}">더보기 (${all.length - visible}개 더)</button>` : ''}
+      </div>
+    `;
+  }).join('');
+
+  grid.querySelectorAll('.more-btn').forEach(btn => {
     btn.onclick = () => {
-      state.mainTab = btn.dataset.tab;
-      if (state.mainTab === 'ranking') { state.sort = 'rank'; }
-      else { state.sort = 'discount_desc'; }
-      renderAll();
+      const cat = btn.dataset.cat;
+      recVisible[cat] = (recVisible[cat] || REC_PAGE_SIZE) + REC_PAGE_SIZE;
+      renderRecGrid();
     };
   });
 }
 
-function renderTabs() {
-  const catTabs = document.getElementById('catTabs');
-  catTabs.innerHTML = CATEGORIES.map(c =>
-    `<button class="cat-tab ${state.category===c?'active':''}" data-cat="${c}">${c}</button>`
-  ).join('');
-  catTabs.querySelectorAll('.cat-tab').forEach(btn => {
-    btn.onclick = () => { state.category = btn.dataset.cat; renderAll(); };
-  });
-
-  const srcTabs = document.getElementById('sourceTabs');
-  const showSourceTabs = state.mainTab === 'browse';
-  srcTabs.style.display = showSourceTabs ? 'flex' : 'none';
-  srcTabs.innerHTML = SOURCES.map(s =>
-    `<button class="source-tab ${state.source===s?'active':''}" data-src="${s}">${s}</button>`
-  ).join('');
-  srcTabs.querySelectorAll('.source-tab').forEach(btn => {
-    btn.onclick = () => { state.source = btn.dataset.src; renderAll(); };
-  });
-
-  const sortRow = document.querySelector('.sort-row');
-  const sortSelect = document.getElementById('sortSelect');
-  if (state.mainTab === 'ranking') {
-    sortSelect.style.display = 'none';
-    sortRow.querySelector('label').style.display = 'none';
-  } else {
-    sortSelect.style.display = '';
-    sortRow.querySelector('label').style.display = '';
-  }
-}
-
-function fmt(n) { return n.toLocaleString('ko-KR') + '원'; }
-
-function renderGrid() {
-  let items = PRODUCTS.filter(p => {
-    if (state.category !== "전체" && p.category !== state.category) return false;
-    if (state.mainTab === 'browse' && state.source !== "전체" && p.source !== state.source) return false;
-    if (state.query) {
-      const q = state.query.toLowerCase();
-      if (!p.brand.toLowerCase().includes(q) && !p.name.toLowerCase().includes(q)) return false;
-    }
-    return true;
-  });
-
-  if (state.mainTab === 'ranking') {
-    items.sort((a, b) => a.overall_rank - b.overall_rank);
-  } else {
-    items.sort((a, b) => {
-      switch(state.sort) {
-        case 'discount_desc': return b.discount - a.discount;
-        case 'price_asc': return a.sale_price - b.sale_price;
-        case 'price_desc': return b.sale_price - a.sale_price;
-        default: return 0;
-      }
-    });
-  }
-
-  document.getElementById('resultCount').textContent = `총 ${items.length}개 상품`;
-
-  const grid = document.getElementById('productGrid');
-  if (items.length === 0) {
-    grid.innerHTML = '<div class="empty-state">조건에 맞는 상품이 없습니다.</div>';
-    return;
-  }
-
-  grid.innerHTML = items.map(p => {
-    const isMulti = p.offers.length > 1;
-    const topBadge = state.mainTab === 'ranking'
-      ? `<div class="rank-badge">${p.overall_rank}</div>`
-      : (isMulti ? `<div class="multi-badge">${p.offers.length}곳 비교</div>` : `<div class="badge-source src-${p.source}">${p.source}</div>`);
-
-    let compareHtml = '';
-    if (isMulti) {
-      const sortedOffers = [...p.offers].sort((a,b) => a.sale_price - b.sale_price);
-      const minPrice = sortedOffers[0].sale_price;
-      compareHtml = `
-        <div class="compare-box">
-          <div class="compare-title">판매처별 가격비교</div>
-          ${sortedOffers.map(o => `
-            <div class="compare-row ${o.sale_price===minPrice?'best':''}">
-              <span class="src-name">${o.source}${o.sale_price===minPrice?' ✓최저가':''}</span>
-              <span class="price-val">${fmt(o.sale_price)}</span>
-            </div>
-          `).join('')}
-        </div>
-      `;
-    }
-
-    return `
-    <a class="card" href="${p.link || '#'}" target="_blank" rel="noopener noreferrer">
-      <div class="card-img">
-        ${p.image ? `<img src="${p.image}" alt="${p.name}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=&quot;no-img&quot;><span class=&quot;icon&quot;>🛍️</span>이미지 준비중</div>'">` : '<div class="no-img"><span class="icon">🛍️</span>이미지 준비중</div>'}
-        ${topBadge}
-        ${p.discount > 0 ? `<div class="badge-discount">-${p.discount}%</div>` : ''}
-      </div>
-      <div class="card-body">
-        <div class="brand">${p.brand}</div>
-        <div class="name">${p.name}</div>
-        <div class="price-row">
-          ${p.discount > 0 ? `<span class="original-price">${fmt(p.original_price)}</span>` : ''}
-          <span class="sale-price">${fmt(p.sale_price)}</span>
-          ${p.discount > 0 ? `<span class="discount-pct">${p.discount}%</span>` : ''}
-        </div>
-        ${compareHtml}
-        <div class="category-tag">
-          <span>${p.category} · ${isMulti ? p.offers.length + '개 사이트' : p.source}</span>
-          <span class="view-link">최저가 보기 →</span>
-        </div>
-      </div>
-    </a>
-  `;
-  }).join('');
-}
-
-function renderAll() {
-  renderMainTabs();
-  renderTabs();
-  renderGrid();
-}
-
-document.getElementById('searchInput').addEventListener('input', (e) => {
-  state.query = e.target.value.trim();
-  renderGrid();
+document.getElementById('retryBtn').addEventListener('click', () => {
+  resetSwipeState();
+  document.getElementById('resultWrap').classList.remove('active');
+  document.getElementById('deckWrap').classList.remove('hidden');
+  renderDeck();
 });
-document.getElementById('sortSelect').addEventListener('change', (e) => {
-  state.sort = e.target.value;
-  renderGrid();
+document.getElementById('btnAnalyzeNow').addEventListener('click', () => {
+  showResults();
 });
 
-renderAll();
+// ============ INIT ============
+(function init() {
+  const saved = loadSwipeState();
+  if (saved && saved.deckOrder && saved.deckOrder.length === LOOKS.length) {
+    deckOrder = saved.deckOrder;
+    deckIndex = saved.deckIndex;
+    scores = saved.scores;
+  } else {
+    resetSwipeState();
+  }
+  renderDeck();
+})();
 </script>
 </body>
 </html>
